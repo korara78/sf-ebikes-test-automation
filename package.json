@@ -1,0 +1,15 @@
+{
+  "name": "sf-ebikes-test-automation",
+  "version": "1.0.0",
+  "description": "Playwright-based test automation suite targeting the [E-Bikes LWC](https://github.com/trailheadapps/ebikes-lwc) sample application (Salesforce, Lightning Web Components + Experience Cloud), deployed to a personal Salesforce Developer Edition org.",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "@types/node": "^26.1.1"
+  }
+}
