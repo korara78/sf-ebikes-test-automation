@@ -10,6 +10,8 @@ Playwright-based test automation suite targeting the [E-Bikes LWC](https://githu
 ## Guides
 
 1. [Environment & Tool Installation](guides/01-environment-setup.md)
+2. [Playwright Test Plan](guides/02-test-plan.md)
+3. [Requirements Traceability](guides/03-requirements-traceability.md)
 
 ## About This Project
 

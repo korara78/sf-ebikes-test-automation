@@ -1,7 +1,7 @@
 # Guide 2 (Draft): Playwright Test Plan
 
 **Project:** Salesforce LWC Test Automation Portfolio (E-Bikes)
-**Status:** 🚧 Tier 1 in progress — Tier 2 deferred until auth setup (storageState / `auth.setup.ts`)
+**Status:** ✅ Tier 1 verified against the live org (see [Guide 3](03-requirements-traceability.md) for per-requirement status) — Tier 2 deferred until auth setup (storageState / `auth.setup.ts`)
 
 ---
 
@@ -64,5 +64,7 @@ Locator strategy: prefer `page.getByRole()`, `getByText()`, `getByLabel()` over 
 
 ## Next Guide
 
-**Guide 3: Authentication & Test Session Strategy** — `auth.setup.ts`, handling Salesforce login/MFA in Playwright, `storageState` reuse — unblocks Tier 2.
+**Guide 3: Requirements Traceability** — maps each test case above to a tracked requirement ID and its live-org-verified status.
+
+**Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts`, handling Salesforce login/MFA in Playwright, `storageState` reuse — unblocks Tier 2.
 

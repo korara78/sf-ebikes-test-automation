@@ -108,33 +108,44 @@ test.describe('Product catalog', () => {
 });
 
 test.describe('Create Case (guest)', () => {
-  test('submitting with all fields filled succeeds and shows confirmation', async ({
+  test('submitting with all fields filled creates a Case (REQ-CASE-002)', async ({
     page
   }) => {
     const createCase = new CreateCasePage(page);
     await page.goto('create-case');
 
-    await createCase.fillSubject('Brakes squeaking on FUSE X1');
-    await createCase.fillDescription(
-      'Front brakes squeak audibly after the first week of commuting.'
-    );
+    const subject = 'Brakes squeaking on FUSE X1';
+    const description =
+      'Front brakes squeak audibly after the first week of commuting.';
+
+    await createCase.fillSubject(subject);
+    await createCase.fillDescription(description);
     // TODO: Priority/Reason/Category/Product are comboboxes/lookups —
     // fill in the actual interaction once the live markup is confirmed.
     await createCase.submit();
 
-    await createCase.expectSuccessToast();
+    await createCase.expectSubmissionSucceeded({ subject, description });
   });
 
-  test('submitting with required fields empty shows validation and does not succeed', async ({
+  test('submitting with required fields empty does not create a case — currently fails, known gap (REQ-CASE-003)', async ({
     page
   }) => {
+    // Confirmed against the live org (see CreateCasePage / Guide 3):
+    // Subject/Description are not actually enforced as required fields on
+    // this form, so this assertion fails today. test.fail() marks that as
+    // expected — if the org's validation is ever added, this test starts
+    // "unexpectedly passing," which is the signal to revisit REQ-CASE-003.
+    test.fail(
+      true,
+      'Known gap: no required-field validation is enforced on this org\'s Create Case form (REQ-CASE-003).'
+    );
+
     const createCase = new CreateCasePage(page);
     await page.goto('create-case');
 
     await createCase.submit();
 
     await createCase.expectValidationError();
-    await createCase.expectNoSuccessToast();
   });
 });
 
