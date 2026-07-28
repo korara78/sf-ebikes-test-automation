@@ -6,9 +6,9 @@ import { CreateCasePage } from '../pages/CreateCasePage';
 /**
  * Tier 1 — Guest storefront tests. No login/session handling needed.
  *
- * Before running: set `baseURL` in playwright.config.ts (or pass full URLs
- * to goto()) to your deployed Experience Cloud site, e.g.
- * https://<your-domain>.my.site.com/E_Bikes/s/
+ * Before running: set the `E_BIKES_BASE_URL` env var to your deployed
+ * Experience Cloud site, e.g. https://<your-domain>.my.site.com/E_Bikes/s/
+ * (playwright.config.ts reads it into `use.baseURL`).
  *
  * A few locators below are marked TODO — they're best guesses from the
  * E-Bikes LWC source, not confirmed against the actual rendered DOM of
