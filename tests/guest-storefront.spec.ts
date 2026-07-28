@@ -27,12 +27,12 @@ test.describe('Product catalog', () => {
 
     await catalog.expectTotalItemCount(16);
     await catalog.expectPage(1, 2);
-    expect(await catalog.productTileCount()).toBe(9);
+    await catalog.expectTileCount(9);
 
     await catalog.goToNextPage();
 
     await catalog.expectPage(2, 2);
-    expect(await catalog.productTileCount()).toBe(7);
+    await catalog.expectTileCount(7);
   });
 
   test('clicking a product opens its detail page with correct name and price', async ({

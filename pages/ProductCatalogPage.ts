@@ -50,9 +50,9 @@ export class ProductCatalogPage {
   }
 
   /**
-   * Confirmed against the live org: tiles render as plain divs with no
-   * `<a>` at all (name/MSRP are bare paragraphs), so the tile is matched
-   * by its `c-product-tile` wrapper element and clicked directly.
+   * Confirmed against the live org: tiles are matched by their
+   * `c-product-tile` wrapper element and clicked directly (the wrapper's
+   * inner `<a>` has no `href`, so it isn't reachable via a link role).
    */
   productTileByName(name: string): Locator {
     return this.page.locator('c-product-tile', { hasText: name });
@@ -62,17 +62,38 @@ export class ProductCatalogPage {
     return this.page.locator('c-product-tile').count();
   }
 
+  /**
+   * Polls rather than asserting once: confirmed against the live org that
+   * pagination/filtering updates the count text and the tile list via two
+   * independent async paths, so the tile list can still be mid-refetch
+   * for a few seconds after the paginator text or filter checkbox has
+   * already settled.
+   */
+  async expectTileCount(count: number) {
+    await expect
+      .poll(() => this.productTileCount(), { timeout: 15000 })
+      .toBe(count);
+  }
+
   async openProduct(name: string) {
     await this.productTileByName(name).click();
   }
 
+  /**
+   * Confirmed against the live org: filtering/pagination round-trips
+   * through Apex for a guest user can take longer than the default 5s
+   * assertion timeout, so this uses a longer one.
+   */
   async expectTotalItemCount(total: number) {
-    await expect(this.paginatorInfo).toContainText(`${total} items`);
+    await expect(this.paginatorInfo).toContainText(`${total} items`, {
+      timeout: 15000
+    });
   }
 
   async expectPage(current: number, totalPages: number) {
     await expect(this.paginatorInfo).toContainText(
-      `page ${current} of ${totalPages}`
+      `page ${current} of ${totalPages}`,
+      { timeout: 15000 }
     );
   }
 
@@ -97,11 +118,14 @@ export class ProductCatalogPage {
    *
    * Confirmed against the live org: the native checkbox resolves correctly
    * via getByLabel, but SLDS renders a styled `span.slds-checkbox` on top
-   * that intercepts pointer events, so a plain click times out waiting for
-   * actionability. `force: true` bypasses that check.
+   * that intercepts pointer events. `force: true` still delivers the click
+   * to that same covered coordinate rather than routing it through the
+   * label, so the input's checked state never actually flips. Clicking
+   * the visible label text instead triggers real browser label-click
+   * forwarding, which both toggles the input and fires its change event.
    */
   async toggleCategoryFilter(label: 'Commuter' | 'Mountain') {
-    await this.page.getByLabel(label).click({ force: true });
+    await this.page.getByText(label, { exact: true }).click();
   }
 
   /**
@@ -109,11 +133,11 @@ export class ProductCatalogPage {
    * ("Beginner" | "Enthusiast" | "Racer").
    */
   async toggleLevelFilter(label: 'Beginner' | 'Enthusiast' | 'Racer') {
-    await this.page.getByLabel(label).click({ force: true });
+    await this.page.getByText(label, { exact: true }).click();
   }
 
   /** Toggles a Material checkbox by its picklist label ("Aluminum" | "Carbon"). */
   async toggleMaterialFilter(label: 'Aluminum' | 'Carbon') {
-    await this.page.getByLabel(label).click({ force: true });
+    await this.page.getByText(label, { exact: true }).click();
   }
 }
