@@ -7,8 +7,10 @@ import { CreateCasePage } from '../pages/CreateCasePage';
  * Tier 1 — Guest storefront tests. No login/session handling needed.
  *
  * Before running: set the `E_BIKES_BASE_URL` env var to your deployed
- * Experience Cloud site, e.g. https://<your-domain>.my.site.com/E_Bikes/s/
- * (playwright.config.ts reads it into `use.baseURL`).
+ * Experience Cloud site, e.g. https://<your-domain>.my.site.com/ebikes/s/
+ * (playwright.config.ts reads it into `use.baseURL`). Paths passed to
+ * goto() must NOT start with a leading slash, or they'll resolve against
+ * the origin and skip the `/ebikes/s/` prefix.
  *
  * A few locators below are marked TODO — they're best guesses from the
  * E-Bikes LWC source, not confirmed against the actual rendered DOM of
@@ -21,7 +23,7 @@ test.describe('Product catalog', () => {
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
-    await catalog.goto('/');
+    await catalog.goto();
 
     await catalog.expectTotalItemCount(16);
     await catalog.expectPage(1, 2);
@@ -38,7 +40,7 @@ test.describe('Product catalog', () => {
   }) => {
     const catalog = new ProductCatalogPage(page);
     const detail = new ProductDetailPage(page);
-    await catalog.goto('/');
+    await catalog.goto();
 
     await catalog.openProduct('FUSE X1');
 
@@ -52,7 +54,7 @@ test.describe('Product catalog', () => {
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
-    await catalog.goto('/');
+    await catalog.goto();
 
     // All categories start checked; uncheck Commuter to leave only Mountain.
     await catalog.toggleCategoryFilter('Commuter');
@@ -64,7 +66,7 @@ test.describe('Product catalog', () => {
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
-    await catalog.goto('/');
+    await catalog.goto();
 
     await catalog.toggleCategoryFilter('Mountain');
 
@@ -75,7 +77,7 @@ test.describe('Product catalog', () => {
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
-    await catalog.goto('/');
+    await catalog.goto();
 
     await catalog.toggleLevelFilter('Enthusiast');
     await catalog.toggleLevelFilter('Racer');
@@ -87,7 +89,7 @@ test.describe('Product catalog', () => {
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
-    await catalog.goto('/');
+    await catalog.goto();
 
     await catalog.toggleLevelFilter('Beginner');
     await catalog.toggleLevelFilter('Racer');
@@ -97,7 +99,7 @@ test.describe('Product catalog', () => {
 
   test('Search narrows results by product name', async ({ page }) => {
     const catalog = new ProductCatalogPage(page);
-    await catalog.goto('/');
+    await catalog.goto();
 
     await catalog.searchByKeyword('FUSE');
 
@@ -109,11 +111,8 @@ test.describe('Create Case (guest)', () => {
   test('submitting with all fields filled succeeds and shows confirmation', async ({
     page
   }) => {
-    // TODO: navigate to wherever the createCase component is actually
-    // routed on the deployed site (the source config uses a `createCase`
-    // route — confirm the URL path once the site is live).
     const createCase = new CreateCasePage(page);
-    await page.goto('/create-case');
+    await page.goto('create-case');
 
     await createCase.fillSubject('Brakes squeaking on FUSE X1');
     await createCase.fillDescription(
@@ -130,7 +129,7 @@ test.describe('Create Case (guest)', () => {
     page
   }) => {
     const createCase = new CreateCasePage(page);
-    await page.goto('/create-case');
+    await page.goto('create-case');
 
     await createCase.submit();
 
@@ -143,11 +142,9 @@ test.describe('Guest access boundaries', () => {
   test('guest sees a Login option and no authenticated-only content', async ({
     page
   }) => {
-    // TODO: this locator is a placeholder pending visual confirmation
-    // against the live deployed site's header/nav — see plan doc note.
     const catalog = new ProductCatalogPage(page);
-    await catalog.goto('/');
+    await catalog.goto();
 
-    await expect(page.getByRole('link', { name: 'Log In' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Log in' })).toBeVisible();
   });
 });

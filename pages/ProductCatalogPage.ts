@@ -4,9 +4,12 @@ import { Page, Locator, expect } from '@playwright/test';
  * Page object for the guest-facing Product Explorer / catalog page
  * (productFilter + productTileList + paginator LWCs).
  *
- * TODO (verify against live org): confirm the exact path of the catalog
- * page under your Experience Cloud site (e.g. `/E_Bikes/s/` or similar) and
- * set it as `baseURL` in playwright.config.ts, or pass the full URL to goto().
+ * Confirmed against the live org: the community is served under
+ * `/ebikes/s/`, and the catalog lives at `/ebikes/s/product-explorer`
+ * (the site root `/ebikes/s/` is the Home page's hero banners, not the
+ * catalog). `baseURL` is set to `.../ebikes/s/`, so `goto()` must use a
+ * path with no leading slash — a leading `/` resolves against the origin
+ * and skips the `/ebikes/s/` prefix entirely.
  */
 export class ProductCatalogPage {
   readonly page: Page;
@@ -33,7 +36,7 @@ export class ProductCatalogPage {
     this.paginatorInfo = page.locator('.nav-info');
   }
 
-  async goto(path = '/') {
+  async goto(path = 'product-explorer') {
     await this.page.goto(path);
   }
 
