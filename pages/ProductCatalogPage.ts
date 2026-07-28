@@ -17,23 +17,32 @@ export class ProductCatalogPage {
   /** Search input inside productFilter (label="Search Key"). */
   readonly searchInput: Locator;
 
-  /** "Previous" / "Next" buttons rendered by the paginator component. */
+  /**
+   * "Previous" / "Next" buttons rendered by the paginator component.
+   * Confirmed against the live org: these are icon-only buttons with no
+   * accessible name (getByRole with a name never matches), so they're
+   * targeted by position — they're the only buttons rendered as siblings
+   * of `.nav-info` inside the paginator container. On page 1 only the
+   * Next button renders, so previousButton/nextButton both resolve to it
+   * there; that's fine since goToPreviousPage() is never called from
+   * page 1 in current tests.
+   */
   readonly previousButton: Locator;
   readonly nextButton: Locator;
 
   /**
    * The paginator's item-count/page text, e.g. "16 items • page 1 of 2".
-   * TODO: confirm the exact rendered separator character against the live
-   * org (source uses a bullet "•" — some locales/renders may differ).
+   * Confirmed against the live org — the "•" bullet separator matches.
    */
   readonly paginatorInfo: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.searchInput = page.getByLabel('Search Key');
-    this.previousButton = page.getByRole('button', { name: 'Previous' });
-    this.nextButton = page.getByRole('button', { name: 'Next' });
     this.paginatorInfo = page.locator('.nav-info');
+    const paginationControls = this.paginatorInfo.locator('..');
+    this.previousButton = paginationControls.getByRole('button').first();
+    this.nextButton = paginationControls.getByRole('button').last();
   }
 
   async goto(path = 'product-explorer') {
@@ -41,21 +50,15 @@ export class ProductCatalogPage {
   }
 
   /**
-   * Product tiles render a name (`.title`) and MSRP inside an `<a>` wrapping
-   * a click handler. TODO: confirm whether the rendered `<a>` has an `href`
-   * (which would give it an implicit `link` role usable via
-   * `page.getByRole('link', { name })`) or whether it's onclick-only, in
-   * which case use this text-based locator instead.
+   * Confirmed against the live org: tiles render as plain divs with no
+   * `<a>` at all (name/MSRP are bare paragraphs), so the tile is matched
+   * by its `c-product-tile` wrapper element and clicked directly.
    */
   productTileByName(name: string): Locator {
-    return this.page.locator('a', { hasText: name });
+    return this.page.locator('c-product-tile', { hasText: name });
   }
 
   async productTileCount(): Promise<number> {
-    // TODO: confirm the actual tile wrapper selector against the live DOM.
-    // productTile.html wraps each tile in a bare `<div draggable>`, so a
-    // more specific data-testid or c-product-tile selector may be needed
-    // if this proves too broad once real markup is inspected.
     return this.page.locator('c-product-tile').count();
   }
 
@@ -91,9 +94,14 @@ export class ProductCatalogPage {
    * Toggles a Category checkbox by its picklist label ("Commuter" | "Mountain").
    * All filter checkboxes start checked; unchecking one removes that value
    * from the active filter.
+   *
+   * Confirmed against the live org: the native checkbox resolves correctly
+   * via getByLabel, but SLDS renders a styled `span.slds-checkbox` on top
+   * that intercepts pointer events, so a plain click times out waiting for
+   * actionability. `force: true` bypasses that check.
    */
   async toggleCategoryFilter(label: 'Commuter' | 'Mountain') {
-    await this.page.getByLabel(label).click();
+    await this.page.getByLabel(label).click({ force: true });
   }
 
   /**
@@ -101,11 +109,11 @@ export class ProductCatalogPage {
    * ("Beginner" | "Enthusiast" | "Racer").
    */
   async toggleLevelFilter(label: 'Beginner' | 'Enthusiast' | 'Racer') {
-    await this.page.getByLabel(label).click();
+    await this.page.getByLabel(label).click({ force: true });
   }
 
   /** Toggles a Material checkbox by its picklist label ("Aluminum" | "Carbon"). */
   async toggleMaterialFilter(label: 'Aluminum' | 'Carbon') {
-    await this.page.getByLabel(label).click();
+    await this.page.getByLabel(label).click({ force: true });
   }
 }
