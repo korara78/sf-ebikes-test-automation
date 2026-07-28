@@ -16,11 +16,9 @@ jobs:
     - name: Install dependencies
       run: npm ci
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps chromium
+      run: npx playwright install --with-deps
     - name: Run Playwright tests
-      # TODO: drop --project=chromium once locators/paths are confirmed
-      # working against the live org, then run the full browser matrix.
-      run: npx playwright test --project=chromium
+      run: npx playwright test
       env:
         E_BIKES_BASE_URL: ${{ secrets.E_BIKES_BASE_URL }}
     - uses: actions/upload-artifact@v4
