@@ -1,0 +1,125 @@
+<svg viewBox="0 0 960 660" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dlt dld">
+<title id="dlt">Salesforce QA Automation development loop</title>
+<desc id="dld">A six-step loop between Claude Cowork, VS Code, Claude Code CLI, and GitHub, plus a diagram of how the local WSL project and the GitHub repo are parallel copies connected by git push, and how Claude Cowork connects to GitHub via public read-only fetch today versus an unauthorized GitHub connector.</desc>
+<defs>
+  <marker id="ah" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto">
+    <path d="M0,0 L9,4 L0,8 Z" fill="#64748b"/>
+  </marker>
+  <marker id="ahd" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto">
+    <path d="M0,0 L9,4 L0,8 Z" fill="#94a3b8"/>
+  </marker>
+  <marker id="aha" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto">
+    <path d="M0,0 L9,4 L0,8 Z" fill="#c2660c"/>
+  </marker>
+</defs>
+<style>
+  .neutral { fill: #eef0f2; stroke: #94a3b8; stroke-width: 1.5; }
+  .accent { fill: #fdecd8; stroke: #c2660c; stroke-width: 1.5; }
+  .big { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.5; }
+  .ttl { fill: #1f2933; font-family: -apple-system, Segoe UI, sans-serif; font-weight: 600; font-size: 15px; }
+  .sub { fill: #64748b; font-family: -apple-system, Segoe UI, sans-serif; font-size: 12px; }
+  .sec { fill: #94a3b8; font-family: -apple-system, Segoe UI, sans-serif; font-size: 12px; letter-spacing: 1.5px; }
+  .lbl { fill: #64748b; font-family: -apple-system, Segoe UI, sans-serif; font-size: 11.5px; }
+  .lbl2 { fill: #94a3b8; font-family: -apple-system, Segoe UI, sans-serif; font-size: 10.5px; font-style: italic; }
+  .arrow { stroke: #64748b; stroke-width: 2; fill: none; marker-end: url(#ah); }
+  .arrowA { stroke: #c2660c; stroke-width: 2; fill: none; marker-end: url(#aha); }
+  .arrowD { stroke: #94a3b8; stroke-width: 1.5; fill: none; stroke-dasharray: 5,4; marker-end: url(#ahd); }
+  .badge { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.2; }
+  .badgeA { fill: #ffffff; stroke: #c2660c; stroke-width: 1.2; }
+  .badgeTxt { fill: #1f2933; font-family: sans-serif; font-size: 11px; font-weight: 700; }
+  .bg { fill: #ffffff; }
+</style>
+
+<rect class="bg" x="0" y="0" width="960" height="660"/>
+
+<!-- Section 1: the dev loop -->
+<text x="480" y="26" text-anchor="middle" class="sec">DEV LOOP — REPEATS EACH ROUND</text>
+
+<!-- Row 1 -->
+<rect x="180" y="50" width="180" height="90" rx="12" class="accent"/>
+<circle cx="192" cy="62" r="11" class="badgeA"/><text x="192" y="66" text-anchor="middle" class="badgeTxt">1</text>
+<text x="270" y="88" text-anchor="middle" class="ttl">Claude Cowork</text>
+<text x="270" y="107" text-anchor="middle" class="sub">Plan &amp; generate code</text>
+<text x="270" y="123" text-anchor="middle" class="sub">(present_files)</text>
+
+<rect x="430" y="50" width="180" height="90" rx="12" class="neutral"/>
+<circle cx="442" cy="62" r="11" class="badge"/><text x="442" y="66" text-anchor="middle" class="badgeTxt">2</text>
+<text x="520" y="88" text-anchor="middle" class="ttl">You + VS Code</text>
+<text x="520" y="107" text-anchor="middle" class="sub">Paste into WSL project</text>
+<text x="520" y="123" text-anchor="middle" class="sub">(manual copy)</text>
+
+<rect x="680" y="50" width="180" height="90" rx="12" class="accent"/>
+<circle cx="692" cy="62" r="11" class="badgeA"/><text x="692" y="66" text-anchor="middle" class="badgeTxt">3</text>
+<text x="770" y="88" text-anchor="middle" class="ttl">Claude Code (CLI)</text>
+<text x="770" y="107" text-anchor="middle" class="sub">/code-review</text>
+<text x="770" y="123" text-anchor="middle" class="sub">sanity check</text>
+
+<!-- Row 2 -->
+<rect x="180" y="260" width="180" height="90" rx="12" class="accent"/>
+<circle cx="192" cy="272" r="11" class="badgeA"/><text x="192" y="276" text-anchor="middle" class="badgeTxt">6</text>
+<text x="270" y="298" text-anchor="middle" class="ttl">Claude Cowork</text>
+<text x="270" y="317" text-anchor="middle" class="sub">Plan next round</text>
+<text x="270" y="333" text-anchor="middle" class="sub">(e.g. Tier 2)</text>
+
+<rect x="430" y="260" width="180" height="90" rx="12" class="neutral"/>
+<circle cx="442" cy="272" r="11" class="badge"/><text x="442" y="276" text-anchor="middle" class="badgeTxt">5</text>
+<text x="520" y="298" text-anchor="middle" class="ttl">GitHub</text>
+<text x="520" y="317" text-anchor="middle" class="sub">Verify pushed changes</text>
+<text x="520" y="333" text-anchor="middle" class="sub">(origin/main)</text>
+
+<rect x="680" y="260" width="180" height="90" rx="12" class="neutral"/>
+<circle cx="692" cy="272" r="11" class="badge"/><text x="692" y="276" text-anchor="middle" class="badgeTxt">4</text>
+<text x="770" y="298" text-anchor="middle" class="ttl">You + Git</text>
+<text x="770" y="317" text-anchor="middle" class="sub">Fix, commit, push</text>
+<text x="770" y="333" text-anchor="middle" class="sub">(local WSL terminal)</text>
+
+<!-- Row1 arrows -->
+<path d="M360,95 H430" class="arrowA"/>
+<path d="M610,95 H680" class="arrow"/>
+<!-- down connector 3->4 -->
+<path d="M770,140 V260" class="arrow"/>
+<!-- Row2 arrows (leftward) -->
+<path d="M680,305 H610" class="arrow"/>
+<path d="M430,305 H360" class="arrowA"/>
+<!-- loop back up 6->1 -->
+<path d="M270,260 V140" class="arrowA"/>
+<text x="300" y="205" class="lbl">repeats ↻</text>
+
+<!-- Section 2: parallel copies -->
+<text x="480" y="392" text-anchor="middle" class="sec">PARALLEL COPIES OF THE REPO</text>
+
+<rect x="120" y="415" width="320" height="95" rx="12" class="big"/>
+<text x="280" y="450" text-anchor="middle" class="ttl">Local WSL Project</text>
+<text x="280" y="469" text-anchor="middle" class="sub">git working copy</text>
+<text x="280" y="485" text-anchor="middle" class="sub">~/projects/sf-ebikes-test-automation</text>
+
+<rect x="520" y="415" width="320" height="95" rx="12" class="big"/>
+<text x="680" y="450" text-anchor="middle" class="ttl">GitHub Repo</text>
+<text x="680" y="469" text-anchor="middle" class="sub">remote origin (main)</text>
+<text x="680" y="485" text-anchor="middle" class="sub">korara78/sf-ebikes-test-automation</text>
+
+<!-- push / pull between local and github -->
+<path d="M440,448 H520" class="arrow"/>
+<text x="480" y="440" text-anchor="middle" class="lbl">git push</text>
+<path d="M520,478 H440" class="arrowD"/>
+<text x="480" y="497" text-anchor="middle" class="lbl2">pull (rare)</text>
+
+<!-- Cowork -> GitHub read connection -->
+<path d="M300,350 C 350,480 470,520 520,470" class="arrowD"/>
+<text x="330" y="530" class="lbl">Public fetch (read-only) — active</text>
+<text x="330" y="544" class="lbl2">GitHub Connector: authorized, repo access not yet granted</text>
+
+<!-- Cowork -> Local (manual bridge) via VS Code step -->
+<path d="M470,140 C 420,260 320,340 280,415" class="arrowD"/>
+<text x="60" y="560" class="lbl">Manual copy: outputs folder → project (no direct write access)</text>
+
+<!-- Legend -->
+<rect x="60" y="590" width="14" height="14" class="accent"/>
+<text x="82" y="601" class="lbl">Claude-assisted step</text>
+<rect x="230" y="590" width="14" height="14" class="neutral"/>
+<text x="252" y="601" class="lbl">Manual / GitHub step</text>
+<line x1="420" y1="597" x2="450" y2="597" class="arrow"/>
+<text x="458" y="601" class="lbl">solid = primary flow</text>
+<line x1="620" y1="597" x2="650" y2="597" class="arrowD"/>
+<text x="658" y="601" class="lbl">dashed = read-only / manual bridge</text>
+</svg>
