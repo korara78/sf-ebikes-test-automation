@@ -9,6 +9,15 @@ import { defineConfig, devices } from '@playwright/test';
 // dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 /**
+ * Normalize to exactly one trailing slash. Relative goto() paths (no
+ * leading slash) resolve against baseURL by replacing everything after
+ * the last '/' — without a trailing slash here, that would clobber the
+ * `/ebikes/s` community path segment instead of appending after it.
+ */
+const rawBaseURL = process.env.E_BIKES_BASE_URL;
+const baseURL = rawBaseURL ? rawBaseURL.replace(/\/+$/, '') + '/' : undefined;
+
+/**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
@@ -26,7 +35,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
-    baseURL: process.env.E_BIKES_BASE_URL,
+    baseURL,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
