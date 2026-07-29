@@ -55,4 +55,4 @@ Both findings came from live-org investigation that went beyond what static code
 
 ## Next Guide
 
-**Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts`, handling Salesforce login/MFA in Playwright, `storageState` reuse — unblocks the Internal Suite (REQ-CASE-001, REQ-PRODUCT-001/002, REQ-ORDER-001).
+**Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts` is built and verified; unblocks REQ-CASE-001, REQ-PRODUCT-001/002, and REQ-ORDER-001 once the Internal Suite's test file is written against it.

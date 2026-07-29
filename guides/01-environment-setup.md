@@ -434,4 +434,4 @@ The GitHub Connector (the "Claude" GitHub App shown under Authorized OAuth Apps)
 
 **Guide 2: Playwright Test Plan** — building the guest-storefront and internal-app test coverage plan, sequencing the Guest Suite (no auth needed) against the Internal Suite (requires session setup).
 
-Then **Guide 3: Authentication & Test Session Strategy** — configuring `auth.setup.ts`, handling Salesforce login/MFA in Playwright, and structuring reusable session state across the test suite.
+Then **Guide 3: Requirements Traceability**, followed by **Guide 4: Authentication & Test Session Strategy** — configuring `auth.setup.ts` and structuring reusable session state across the test suite.

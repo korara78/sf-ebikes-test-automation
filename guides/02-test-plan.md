@@ -66,5 +66,5 @@ Locator strategy: prefer `page.getByRole()`, `getByText()`, `getByLabel()` over 
 
 **Guide 3: Requirements Traceability** — maps each test case above to a tracked requirement ID and its live-org-verified status.
 
-**Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts`, handling Salesforce login/MFA in Playwright, `storageState` reuse — unblocks the Internal Suite.
+**Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts` is built and verified; unblocks writing the Internal Suite's test file.
 

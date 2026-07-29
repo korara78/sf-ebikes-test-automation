@@ -43,19 +43,51 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    /* Runs auth.setup.ts once to produce the Internal Suite's storageState. */
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+    },
+
+    /* Guest Suite — public storefront, no session/storageState. */
     {
       name: 'chromium',
+      testMatch: /guest-storefront\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'firefox',
+      testMatch: /guest-storefront\.spec\.ts/,
       use: { ...devices['Desktop Firefox'] },
     },
 
     {
       name: 'webkit',
+      testMatch: /guest-storefront\.spec\.ts/,
       use: { ...devices['Desktop Safari'] },
+    },
+
+    /* Internal Suite — authenticated Lightning app, reuses storageState from auth.setup.ts. */
+    {
+      name: 'chromium-internal',
+      testMatch: /internal-app\.spec\.ts/,
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/user.json' },
+    },
+
+    {
+      name: 'firefox-internal',
+      testMatch: /internal-app\.spec\.ts/,
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Firefox'], storageState: 'playwright/.auth/user.json' },
+    },
+
+    {
+      name: 'webkit-internal',
+      testMatch: /internal-app\.spec\.ts/,
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Safari'], storageState: 'playwright/.auth/user.json' },
     },
 
     /* Test against mobile viewports. */
