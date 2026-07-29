@@ -18,7 +18,10 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
-      run: npx playwright test
+      # Guest Suite only: the Internal Suite's `setup` project shells out to
+      # the `sf` CLI, which isn't installed/authenticated in CI (see Guide 4).
+      # Revisit once Internal Suite CI credentialing is wired up.
+      run: npx playwright test --project=chromium --project=firefox --project=webkit
       env:
         E_BIKES_BASE_URL: ${{ secrets.E_BIKES_BASE_URL }}
     - uses: actions/upload-artifact@v4
