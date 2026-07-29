@@ -16,7 +16,7 @@ import { Page, Locator, Request, expect } from '@playwright/test';
  *   never appears, and lightning-record-edit-form does not reset the
  *   form fields either. Neither can be asserted on. Instead, this
  *   verifies the actual outgoing `createRecord` Aura request contains
- *   the exact field values submitted — a Tier-1-safe check (no
+ *   the exact field values submitted — a Guest-Suite-safe check (no
  *   Salesforce API/CLI access needed) of what the form does, decoupled
  *   from Salesforce's broken response handling.
  * - Subject/Description are NOT enforced as required fields on this

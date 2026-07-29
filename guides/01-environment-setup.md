@@ -416,7 +416,7 @@ This project uses two different AI surfaces at different stages of the loop, plu
 | 3 | **Claude Code (CLI)** | Run `claude` from the repo root, then `/code-review`, for a sanity check with full local repo context before committing. |
 | 4 | **You + Git** | Fix anything flagged, then `git add` / `commit` / `push` from the WSL terminal. |
 | 5 | **GitHub** | Verify the push landed as expected on `origin/main`. |
-| 6 | **Claude Cowork** | Plan the next round (e.g. Tier 2 tests, once `auth.setup.ts` exists) — loop repeats. |
+| 6 | **Claude Cowork** | Plan the next round (e.g. Internal Suite tests, once `auth.setup.ts` exists) — loop repeats. |
 
 ### Two copies of one repo
 
@@ -432,6 +432,6 @@ The GitHub Connector (the "Claude" GitHub App shown under Authorized OAuth Apps)
 
 ## Next Guide
 
-**Guide 2: Playwright Test Plan** — building the guest-storefront and internal-app test coverage plan, sequencing Tier 1 (no auth needed) against Tier 2 (requires session setup).
+**Guide 2: Playwright Test Plan** — building the guest-storefront and internal-app test coverage plan, sequencing the Guest Suite (no auth needed) against the Internal Suite (requires session setup).
 
 Then **Guide 3: Authentication & Test Session Strategy** — configuring `auth.setup.ts`, handling Salesforce login/MFA in Playwright, and structuring reusable session state across the test suite.

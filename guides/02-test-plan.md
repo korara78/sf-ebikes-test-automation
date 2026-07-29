@@ -1,22 +1,22 @@
 # Guide 2 (Draft): Playwright Test Plan
 
 **Project:** Salesforce LWC Test Automation Portfolio (E-Bikes)
-**Status:** ✅ Tier 1 verified against the live org (see [Guide 3](03-requirements-traceability.md) for per-requirement status) — Tier 2 deferred until auth setup (storageState / `auth.setup.ts`)
+**Status:** ✅ Guest Suite verified against the live org (see [Guide 3](03-requirements-traceability.md) for per-requirement status) — Internal Suite deferred until auth setup (storageState / `auth.setup.ts`)
 
 ---
 
 ## Overview
 
-This plan targets the E-Bikes LWC sample app (Salesforce, Lightning Web Components + Experience Cloud) deployed per Guide 1. It's split into two tiers by whether a test needs a logged-in session:
+This plan targets the E-Bikes LWC sample app (Salesforce, Lightning Web Components + Experience Cloud) deployed per Guide 1. It's split into two suites by whether a test needs a logged-in session:
 
-- **Tier 1 — Guest storefront.** Public Experience Cloud site. No auth needed. Build first.
-- **Tier 2 — Internal Lightning app.** Requires a logged-in session via `storageState`. Deferred until that's built (see Guide 1, Step 5 preview).
+- **Guest Suite — Guest storefront.** Public Experience Cloud site. No auth needed. Build first.
+- **Internal Suite — Internal Lightning app.** Requires a logged-in session via `storageState`. Deferred until that's built (see Guide 1, Step 5 preview).
 
 Every test case below was checked against the actual E-Bikes source (`ProductController.cls`, the LWC components, and the sample data file) rather than assumed from the UI alone, since a few things about page size and component placement aren't obvious just from clicking around.
 
 ---
 
-## Tier 1 — Guest Storefront
+## Guest Suite — Guest Storefront
 
 No login/session handling needed.
 
@@ -33,7 +33,7 @@ No login/session handling needed.
 
 ---
 
-## Tier 2 — Internal Lightning App (deferred)
+## Internal Suite — Internal Lightning App (deferred)
 
 Needs a logged-in session — this is exactly what `auth.setup.ts` (Guide 1, Step 5 preview) exists to solve, so these wait until that's built.
 
@@ -50,8 +50,8 @@ Needs a logged-in session — this is exactly what `auth.setup.ts` (Guide 1, Ste
 
 ```
 tests/
-  guest-storefront.spec.ts     ← Tier 1 tests
-  internal-app.spec.ts         ← Tier 2 tests (after auth.setup.ts exists)
+  guest-storefront.spec.ts     ← Guest Suite tests
+  internal-app.spec.ts         ← Internal Suite tests (after auth.setup.ts exists)
 pages/
   ProductCatalogPage.ts        ← page object: catalog locators/actions (filters, search, pagination)
   ProductDetailPage.ts         ← page object: product detail assertions
@@ -66,5 +66,5 @@ Locator strategy: prefer `page.getByRole()`, `getByText()`, `getByLabel()` over 
 
 **Guide 3: Requirements Traceability** — maps each test case above to a tracked requirement ID and its live-org-verified status.
 
-**Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts`, handling Salesforce login/MFA in Playwright, `storageState` reuse — unblocks Tier 2.
+**Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts`, handling Salesforce login/MFA in Playwright, `storageState` reuse — unblocks the Internal Suite.
 

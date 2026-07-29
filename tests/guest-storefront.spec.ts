@@ -4,7 +4,7 @@ import { ProductDetailPage } from '../pages/ProductDetailPage';
 import { CreateCasePage } from '../pages/CreateCasePage';
 
 /**
- * Tier 1 — Guest storefront tests. No login/session handling needed.
+ * Guest Suite — Guest storefront tests. No login/session handling needed.
  *
  * Before running: set the `E_BIKES_BASE_URL` env var to your deployed
  * Experience Cloud site, e.g. https://<your-domain>.my.site.com/ebikes/s/

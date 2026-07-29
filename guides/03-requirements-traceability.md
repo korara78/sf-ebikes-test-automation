@@ -1,22 +1,22 @@
 # Guide 3: Requirements Traceability
 
 **Project:** Salesforce LWC Test Automation Portfolio (E-Bikes)
-**Status:** Tier 1 fully verified against the live org (12/12 tests passing, one documented known gap)
+**Status:** Guest Suite fully verified against the live org (12/12 tests passing, one documented known gap)
 
 ---
 
 ## Overview
 
-Each requirement below maps to a Tier 1 or Tier 2 test case from [Guide 2](02-test-plan.md) and tracks its verification status against the actual live, deployed org — not just what the source code implies should happen. Several requirements only reached their final status after live-org investigation surfaced real platform behavior that source-reading alone couldn't have predicted (see the notes column).
+Each requirement below maps to a Guest Suite or Internal Suite test case from [Guide 2](02-test-plan.md) and tracks its verification status against the actual live, deployed org — not just what the source code implies should happen. Several requirements only reached their final status after live-org investigation surfaced real platform behavior that source-reading alone couldn't have predicted (see the notes column).
 
 **Status legend:**
 - ✅ **Confirmed** — verified passing against the live org, current test suite reflects real behavior
 - ❌ **Known Gap** — verified against the live org; the requirement does not actually hold, and the test documents this rather than papering over it
-- 🚧 **Deferred** — blocked on `auth.setup.ts` (Tier 2, needs an authenticated session)
+- 🚧 **Deferred** — blocked on `auth.setup.ts` (Internal Suite, needs an authenticated session)
 
 ---
 
-## Tier 1 — Guest Storefront
+## Guest Suite — Guest Storefront
 
 | ID | Requirement | Status | Notes |
 |---|---|---|---|
@@ -31,7 +31,7 @@ Each requirement below maps to a Tier 1 or Tier 2 test case from [Guide 2](02-te
 
 ---
 
-## Tier 2 — Internal Lightning App (deferred)
+## Internal Suite — Internal Lightning App (deferred)
 
 | ID | Requirement | Status |
 |---|---|---|
@@ -55,4 +55,4 @@ Both findings came from live-org investigation that went beyond what static code
 
 ## Next Guide
 
-**Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts`, handling Salesforce login/MFA in Playwright, `storageState` reuse — unblocks Tier 2 (REQ-CASE-001, REQ-PRODUCT-001/002, REQ-ORDER-001).
+**Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts`, handling Salesforce login/MFA in Playwright, `storageState` reuse — unblocks the Internal Suite (REQ-CASE-001, REQ-PRODUCT-001/002, REQ-ORDER-001).
