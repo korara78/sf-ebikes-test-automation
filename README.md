@@ -1,5 +1,7 @@
 # Salesforce E-Bikes Test Automation
 
+![E-Bikes guest storefront](guides-assets/guest-storefront.png)
+
 Playwright-based test automation suite targeting the [E-Bikes LWC](https://github.com/trailheadapps/ebikes-lwc) sample application (Salesforce, Lightning Web Components + Experience Cloud), deployed to a personal Salesforce Developer Edition org.
 
 ## Contents
