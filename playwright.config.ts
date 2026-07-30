@@ -31,8 +31,12 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  /* Auto-open the HTML report (and its Trace Viewer links) after every local run; CI has no display, so it stays 'never' there and relies on the uploaded playwright-report/ artifact instead. */
-  reporter: [['html', { open: process.env.CI ? 'never' : 'always' }]],
+  reporter: [
+    /* Auto-open the HTML report (and its Trace Viewer links) after every local run; CI has no display, so it stays 'never' there and relies on the uploaded playwright-report/ artifact instead. */
+    ['html', { open: process.env.CI ? 'never' : 'always' }],
+    /* Machine-readable results, consumed by scripts/generate-traceability-matrix.mjs to derive live status per @TC-### tag. */
+    ['json', { outputFile: 'test-results/results.json' }]
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */

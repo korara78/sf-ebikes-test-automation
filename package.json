@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Playwright-based test automation suite targeting the [E-Bikes LWC](https://github.com/trailheadapps/ebikes-lwc) sample application (Salesforce, Lightning Web Components + Experience Cloud), deployed to a personal Salesforce Developer Edition org.",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "gen:matrix": "node scripts/generate-traceability-matrix.mjs"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
