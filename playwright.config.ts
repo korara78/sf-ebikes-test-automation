@@ -41,8 +41,8 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
 
-    /* Capture a screenshot after every test. */
-    screenshot: 'on',
+    /* Capture a full-page screenshot after every test (viewport only isn't enough to see the whole product grid). */
+    screenshot: { mode: 'on', fullPage: true },
 
     /* Record video, keeping it only for failed tests. */
     video: 'retain-on-failure',
