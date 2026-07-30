@@ -62,9 +62,17 @@ Locator strategy: prefer `page.getByRole()`, `getByText()`, `getByLabel()` over 
 
 ---
 
+## Reporting & Diagnostics
+
+Every test run captures a screenshot (pass or fail) and, on failure, video and a trace — see [Guide 5](05-visual-reporting-and-debugging.md) for the full config and the troubleshooting workflow (screenshot first, then `trace.zip` if that's not enough). This applies uniformly across both suites, not just Guest.
+
+---
+
 ## Next Guide
 
 **Guide 3: Requirements Traceability** — maps each test case above to a tracked requirement ID and its live-org-verified status.
 
 **Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts` is built and verified; unblocks writing the Internal Suite's test file.
+
+**Guide 5: Visual Reporting & Trace Debugging** — screenshot/video/trace capture config and the troubleshooting workflow, applying to both suites.
 
