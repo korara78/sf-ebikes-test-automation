@@ -19,7 +19,7 @@ import { CreateCasePage } from '../pages/CreateCasePage';
  */
 
 test.describe('Product catalog', () => {
-  test('loads page 1 with 9 of 16 products, then pages to the remaining 7', async ({
+  test('loads page 1 with 9 of 16 products, then pages to the remaining 7', { tag: '@TC-001' }, async ({
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
@@ -35,7 +35,7 @@ test.describe('Product catalog', () => {
     await catalog.expectTileCount(7);
   });
 
-  test('clicking a product opens its detail page with correct name and price', async ({
+  test('clicking a product opens its detail page with correct name and price', { tag: '@TC-002' }, async ({
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
@@ -50,7 +50,7 @@ test.describe('Product catalog', () => {
     await detail.expectMsrp('$2,500');
   });
 
-  test('Category filter narrows results to Mountain bikes only (8 products)', async ({
+  test('Category filter narrows results to Mountain bikes only (8 products)', { tag: '@TC-003' }, async ({
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
@@ -62,7 +62,7 @@ test.describe('Product catalog', () => {
     await catalog.expectTotalItemCount(8);
   });
 
-  test('Category filter narrows results to Commuter bikes only (8 products)', async ({
+  test('Category filter narrows results to Commuter bikes only (8 products)', { tag: '@TC-004' }, async ({
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
@@ -73,7 +73,7 @@ test.describe('Product catalog', () => {
     await catalog.expectTotalItemCount(8);
   });
 
-  test('Level filter narrows results to Beginner bikes only (8 products)', async ({
+  test('Level filter narrows results to Beginner bikes only (8 products)', { tag: '@TC-005' }, async ({
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
@@ -85,7 +85,7 @@ test.describe('Product catalog', () => {
     await catalog.expectTotalItemCount(8);
   });
 
-  test('Level filter narrows results to Enthusiast bikes only (4 products)', async ({
+  test('Level filter narrows results to Enthusiast bikes only (4 products)', { tag: '@TC-006' }, async ({
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
@@ -97,7 +97,7 @@ test.describe('Product catalog', () => {
     await catalog.expectTotalItemCount(4);
   });
 
-  test('Search narrows results by product name', async ({ page }) => {
+  test('Search narrows results by product name', { tag: '@TC-007' }, async ({ page }) => {
     const catalog = new ProductCatalogPage(page);
     await catalog.goto();
 
@@ -108,7 +108,7 @@ test.describe('Product catalog', () => {
 });
 
 test.describe('Create Case (guest)', () => {
-  test('submitting with all fields filled creates a Case (REQ-CASE-002)', async ({
+  test('submitting with all fields filled creates a Case', { tag: '@TC-008' }, async ({
     page
   }) => {
     const createCase = new CreateCasePage(page);
@@ -127,17 +127,17 @@ test.describe('Create Case (guest)', () => {
     await createCase.expectSubmissionSucceeded({ subject, description });
   });
 
-  test('submitting with required fields empty does not create a case — currently fails, known gap (REQ-CASE-003)', async ({
+  test('submitting with required fields empty does not create a case — currently fails, known gap', { tag: '@TC-009' }, async ({
     page
   }) => {
     // Confirmed against the live org (see CreateCasePage / Guide 3):
     // Subject/Description are not actually enforced as required fields on
     // this form, so this assertion fails today. test.fail() marks that as
     // expected — if the org's validation is ever added, this test starts
-    // "unexpectedly passing," which is the signal to revisit REQ-CASE-003.
+    // "unexpectedly passing," which is the signal to revisit this requirement.
     test.fail(
       true,
-      'Known gap: no required-field validation is enforced on this org\'s Create Case form (REQ-CASE-003).'
+      'Known gap: no required-field validation is enforced on this org\'s Create Case form.'
     );
 
     const createCase = new CreateCasePage(page);
@@ -150,7 +150,7 @@ test.describe('Create Case (guest)', () => {
 });
 
 test.describe('Guest access boundaries', () => {
-  test('guest sees a Login option and no authenticated-only content', async ({
+  test('guest sees a Login option and no authenticated-only content', { tag: '@TC-010' }, async ({
     page
   }) => {
     const catalog = new ProductCatalogPage(page);
