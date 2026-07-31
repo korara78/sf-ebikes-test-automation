@@ -21,7 +21,7 @@
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { guestSuite, internalSuite } from '../guides/traceability-map.mjs';
+import { guestSuite, internalSuite, apiSuite, authzSuite } from '../guides/traceability-map.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -76,12 +76,22 @@ function deriveRowStatus(testIds, tagIndex) {
   const found = testIds.flatMap((id) => tagIndex.get(id) ?? []);
   const idsFound = new Set(testIds.filter((id) => tagIndex.has(id)));
 
-  if (found.length === 0) {
+  // A spec that was only *listed* (`--list`), or whose run was interrupted
+  // before it started, reports `status: 'skipped'` with an empty
+  // `results` array — but `ok`/`expectedStatus` on that same spec look
+  // identical to a genuine pass, since neither field reflects whether the
+  // test actually executed. Exclude specs with no real result so they
+  // can't masquerade as Confirmed.
+  const executed = found.filter((spec) =>
+    spec.tests?.some((t) => (t.results ?? []).length > 0)
+  );
+
+  if (executed.length === 0) {
     return { badge: '⚪ Not Run', liveInfo: null };
   }
 
-  const anyRegression = found.some((spec) => spec.ok === false);
-  const expectedFailure = found.some(
+  const anyRegression = executed.some((spec) => spec.ok === false);
+  const expectedFailure = executed.some(
     (spec) => spec.tests?.[0]?.expectedStatus === 'failed'
   );
 
@@ -93,7 +103,7 @@ function deriveRowStatus(testIds, tagIndex) {
 
   const projects = new Set();
   let latestStart = null;
-  for (const spec of found) {
+  for (const spec of executed) {
     for (const t of spec.tests ?? []) {
       projects.add(t.projectName);
       for (const r of t.results ?? []) {
@@ -168,7 +178,7 @@ function validate(allRows) {
 function main() {
   const results = loadResults();
   const tagIndex = buildTagIndex(results);
-  const allRows = [...guestSuite, ...internalSuite];
+  const allRows = [...guestSuite, ...internalSuite, ...apiSuite, ...authzSuite];
 
   const { orphanInCode, staleInMap } = validate(allRows);
 
@@ -202,12 +212,12 @@ function main() {
         ].join('\n')
       : '';
 
-  const guestConfirmedCount = guestSuite.filter(
-    (r) => deriveRowStatus(r.testIds, tagIndex).badge === '✅ Confirmed'
-  ).length;
-  const internalConfirmedCount = internalSuite.filter(
-    (r) => deriveRowStatus(r.testIds, tagIndex).badge === '✅ Confirmed'
-  ).length;
+  const confirmedCount = (suite) =>
+    suite.filter((r) => deriveRowStatus(r.testIds, tagIndex).badge === '✅ Confirmed').length;
+  const guestConfirmedCount = confirmedCount(guestSuite);
+  const internalConfirmedCount = confirmedCount(internalSuite);
+  const apiConfirmedCount = confirmedCount(apiSuite);
+  const authzConfirmedCount = confirmedCount(authzSuite);
   const regressionCount = allRows.filter(
     (r) => deriveRowStatus(r.testIds, tagIndex).badge === '🔴 Regression'
   ).length;
@@ -219,7 +229,7 @@ function main() {
     minute: '2-digit'
   });
 
-  const summary = `**Status:** ${guestConfirmedCount}/${guestSuite.length} Guest Suite + ${internalConfirmedCount}/${internalSuite.length} Internal Suite requirements confirmed${
+  const summary = `**Status:** ${guestConfirmedCount}/${guestSuite.length} Guest Suite + ${internalConfirmedCount}/${internalSuite.length} Internal Suite + ${apiConfirmedCount}/${apiSuite.length} API Suite + ${authzConfirmedCount}/${authzSuite.length} Penetration Suite requirements confirmed${
     regressionCount > 0 ? `, **${regressionCount} regression(s) detected**` : ''
   } — matrix auto-generated ${generatedAt} from the latest test run`;
 
@@ -232,6 +242,8 @@ function main() {
     'LTM:INTERNAL',
     renderTable(internalSuite, tagIndex)
   );
+  doc = replaceBetween(doc, 'LTM:API', renderTable(apiSuite, tagIndex));
+  doc = replaceBetween(doc, 'LTM:AUTHZ', renderTable(authzSuite, tagIndex));
 
   writeFileSync(docPath, doc);
   console.log(`✅ Matrix regenerated: ${docPath}`);

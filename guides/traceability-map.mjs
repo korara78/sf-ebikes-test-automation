@@ -98,3 +98,65 @@ export const internalSuite = [
       'Both the top-right "Edit" button and every per-field pencil icon open the same full-record modal (`Edit {ProductName}`) — there\'s no separate lightweight per-field popover despite the pencil icons suggesting one.'
   }
 ];
+
+export const apiSuite = [
+  {
+    reqId: 'REQ-API-001',
+    testIds: ['TC-015'],
+    requirement: 'Querying Product__c via the standard REST API returns the correct MSRP for a known product',
+    notes:
+      'Calls `GET /services/data/vXX.X/query` directly with a bearer token (`pages/apiSession.ts`), no browser involved. Asserts the same $2,500 MSRP for FUSE X1 that the Guest Suite\'s TC-002 confirms through the rendered UI — same fact, verified at the API layer instead. **Confirmed against the live org:** the first real run of this suite failed with a uniform 401 on every authenticated call — `sf org display`, even with `--verbose`, no longer includes the real access token on current CLI versions; it\'s replaced with a literal `"[REDACTED] Use \'sf org auth show-access-token\' to view"` placeholder string, which was being sent as the bearer token verbatim. Fixed by combining `sf org display --json` (for `instanceUrl`, still unredacted) with the dedicated `sf org auth show-access-token -o <org> --json` command for the actual token.'
+  },
+  {
+    reqId: 'REQ-API-002',
+    testIds: ['TC-016'],
+    requirement: 'A Case can be created directly via the REST API, bypassing the LWC UI entirely',
+    notes:
+      'E-Bikes has no custom `@RestResource` endpoint of its own (confirmed by reading the `ebikes-lwc` Apex source) — Case creation normally goes through `lightning-record-edit-form`/Lightning Data Service. This hits the standard `POST /sobjects/Case` endpoint that LDS itself calls under the hood, and confirms the created record round-trips correctly via a follow-up GET.'
+  },
+  {
+    reqId: 'REQ-API-003',
+    testIds: ['TC-017'],
+    requirement: 'A Case created via REST can be updated via REST and the change persists',
+    notes: 'PATCH returns 204 with an empty body (standard Salesforce REST behavior for updates); persistence is confirmed via a follow-up GET rather than trusting the PATCH response itself.'
+  },
+  {
+    reqId: 'REQ-API-004',
+    testIds: ['TC-018'],
+    requirement: 'A Case created via REST can be deleted via REST',
+    notes:
+      'The one place in this repo that deliberately cleans up after itself — unlike every other suite\'s "leave real records behind" convention, deleting a record it just created is the thing under test here, not tidying up. Confirms the follow-up GET returns 404 once deleted.'
+  },
+  {
+    reqId: 'REQ-API-005',
+    testIds: ['TC-019'],
+    requirement: 'Requesting a nonexistent record Id returns a 404 with the expected Salesforce error shape',
+    notes:
+      'Negative-path/error-handling coverage, deliberately distinct from the four happy-path CRUD tests above. Uses a syntactically valid but nonexistent 18-char Case Id (`"500" + 12 zeros + "AAA"`) and asserts `errorCode: "NOT_FOUND"` — the same REST-level error already documented as the root cause of REQ-CASE-002\'s cosmetic UI failure, now asserted directly rather than inferred from a race.'
+  }
+];
+
+export const authzSuite = [
+  {
+    reqId: 'REQ-AUTHZ-001',
+    testIds: ['TC-020'],
+    requirement: 'A guest session cannot reach the standard REST API',
+    notes:
+      'The guest profile grants no `ApiEnabled` permission (confirmed in the org\'s guest profile metadata, `ebikes-lwc/guest-profile-metadata/profiles/E-Bikes Profile.profile`) — this probes it empirically rather than trusting the metadata alone, using the actual session cookies from a real guest page visit (`browserContext.request` shares cookies with the browser context it\'s attached to) against the community site\'s own origin.'
+  },
+  {
+    reqId: 'REQ-AUTHZ-002',
+    testIds: ['TC-021'],
+    requirement: 'A guest session cannot read a Case it does not own via the UI API (cross-record IDOR)',
+    notes:
+      'The guest profile has `Case` `allowRead=true` but no `viewAllRecords` and no guest sharing rule on Case at all (confirmed in guest profile metadata) — so a guest should never be able to fetch an arbitrary existing Case by Id, only ones it has explicit access to. The "foreign" Case is simply the most recently created one in the org (there\'s always at least one, given every suite here leaves real Cases behind).'
+  },
+  {
+    reqId: 'REQ-AUTHZ-003',
+    testIds: ['TC-022'],
+    requirement:
+      'A guest cannot set a field absent from the Create Case form via a tampered createRecord payload (mass assignment / Broken Object Property Level Authorization)',
+    notes:
+      'Reuses the exact `aura://RecordUiController/ACTION$createRecord` request `CreateCasePage` already knows how to parse (see REQ-CASE-002), but intercepts it via `page.route()` and injects `Case.IsEscalated: true` — a real field, not on the rendered form, not editable for the guest profile per its field-level-security metadata. **Confirmed against the live org:** Lightning Data Service doesn\'t silently drop the inaccessible field — it rejects the entire create request outright, surfacing "Unable to create/update fields: IsEscalated. Please check the security settings of this field and verify that it is read/write for your profile or permission set." No Case is created at all. A stronger secure outcome than either alternative originally considered when this test was written.'
+  }
+];

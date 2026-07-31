@@ -101,6 +101,29 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'], storageState: 'playwright/.auth/user.json' },
     },
 
+    /* API Suite — direct Salesforce REST API calls via `request`, no
+     * browser/page involved. A single project is enough: there's no
+     * browser-engine-dependent behavior in raw HTTP calls, unlike the
+     * suites above. Auth is a bearer token (pages/apiSession.ts), not
+     * storageState, so this has no dependency on `setup`. */
+    {
+      name: 'api',
+      testMatch: /api\.spec\.ts/,
+    },
+
+    /* Penetration Suite — guest authorization-boundary tests. Uses a real
+     * browser (fresh guest contexts + page.route() tampering), but only
+     * one engine: these tests probe server-side authorization enforcement,
+     * not rendering, so multiplying across browsers would just be slower
+     * without adding coverage. No `setup` dependency — every test here is
+     * deliberately unauthenticated/guest, never the Internal Suite's
+     * storageState. */
+    {
+      name: 'penetration',
+      testMatch: /penetration\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+
     /* Test against mobile viewports. */
     // {
     //   name: 'Mobile Chrome',

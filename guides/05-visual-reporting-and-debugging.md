@@ -88,3 +88,5 @@ The `use.screenshot` / `use.video` / `use.trace` settings above are already comm
 ## Next Guide
 
 Writing `internal-app.spec.ts` against the Internal Suite requirements from Guide 2, using the authenticated session from [Guide 4](04-authentication-test-session-strategy.md).
+
+Later: [Guide 6: API & Authorization Boundary Testing](06-api-and-authorization-boundary-testing.md) — a standalone API Suite and a Penetration Suite, added once the Guest/Internal Suites were both complete and CI-green.
