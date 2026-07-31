@@ -1,7 +1,8 @@
 import { test as setup, expect } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { authFile, originFile } from '../pages/internalSession';
 
 /**
  * Internal Suite auth setup.
@@ -15,9 +16,14 @@ import path from 'node:path';
  * storageState for the Internal Suite projects to reuse.
  *
  * Requires: `sf` CLI authenticated against the target org (see Guide 1).
+ *
+ * Also persists the internal Lightning app's origin (see
+ * `pages/internalSession.ts`): `playwright.config.ts`'s `baseURL` is the
+ * guest Experience Cloud community domain, but the internal Lightning app
+ * lives on a completely different origin
+ * (`https://<org>.lightning.force.com`), which Internal Suite page objects
+ * need as an absolute URL.
  */
-
-export const authFile = path.join(__dirname, '../playwright/.auth/user.json');
 
 const targetOrg = process.env.SF_TARGET_ORG ?? 'mydevorg';
 
@@ -40,4 +46,5 @@ setup('authenticate via sf CLI frontdoor bridge', async ({ page }) => {
 
   mkdirSync(path.dirname(authFile), { recursive: true });
   await page.context().storageState({ path: authFile });
+  writeFileSync(originFile, JSON.stringify({ origin: new URL(page.url()).origin }));
 });
