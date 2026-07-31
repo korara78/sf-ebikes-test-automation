@@ -1,7 +1,7 @@
 # Guide 2 (Draft): Playwright Test Plan
 
 **Project:** Salesforce LWC Test Automation Portfolio (E-Bikes)
-**Status:** ✅ Guest Suite verified against the live org (see [Guide 3](03-requirements-traceability.md) for per-requirement status) — Internal Suite deferred until auth setup (storageState / `auth.setup.ts`)
+**Status:** ✅ Guest Suite and Internal Suite both verified against the live org (see [Guide 3](03-requirements-traceability.md) for per-requirement status)
 
 ---
 
@@ -9,8 +9,8 @@
 
 This plan targets the E-Bikes LWC sample app (Salesforce, Lightning Web Components + Experience Cloud) deployed per Guide 1. It's split into two suites by whether a test needs a logged-in session:
 
-- **Guest Suite — Guest storefront.** Public Experience Cloud site. No auth needed. Build first.
-- **Internal Suite — Internal Lightning app.** Requires a logged-in session via `storageState`. Deferred until that's built (see Guide 1, Step 5 preview).
+- **Guest Suite — Guest storefront.** Public Experience Cloud site. No auth needed.
+- **Internal Suite — Internal Lightning app.** Requires a logged-in session via `storageState` (`auth.setup.ts`, see Guide 4).
 
 Every test case below was checked against the actual E-Bikes source (`ProductController.cls`, the LWC components, and the sample data file) rather than assumed from the UI alone, since a few things about page size and component placement aren't obvious just from clicking around.
 
@@ -33,16 +33,16 @@ No login/session handling needed.
 
 ---
 
-## Internal Suite — Internal Lightning App (deferred)
+## Internal Suite — Internal Lightning App
 
-Needs a logged-in session — this is exactly what `auth.setup.ts` (Guide 1, Step 5 preview) exists to solve, so these wait until that's built.
+Needs a logged-in session — `auth.setup.ts` (Guide 4) solves that via the `sf` CLI frontdoor bridge, wired in as the `setup` project dependency for `chromium-internal`/`firefox-internal`/`webkit-internal`.
 
-| # | Test | Why it matters |
-|---|---|---|
-| A | A case submitted as a guest actually appears in the internal Case list | End-to-end proof the guest-facing flow reaches internal staff |
-| B | Product Explorer loads real product data for an internal user | Confirms the internal Lightning app surface separately from the guest site |
-| C | **Order Builder**: an internal user can build an order (select sizes/quantities via the `orderBuilder` component, backed by `Qty_S__c`/`Qty_M__c`/`Qty_L__c`) and it's reflected in `Order_Item__c` records | This is the actual mechanism behind "managing reseller orders" — the app's stated purpose — and is more central than a generic Product record edit. `orderBuilder` and `Order__c`/`Order_Item__c` have no guest sharing rules, so this is internal-only. |
-| D | An internal user can view/edit a Product record | Baseline CRUD coverage on the internal side |
+| # | TC | Test | Why it matters |
+|---|---|---|---|
+| A | TC-011 | A case submitted as a guest actually appears in the internal Case list | End-to-end proof the guest-facing flow reaches internal staff |
+| B | TC-012 | Product Explorer loads real product data for an internal user | Confirms the internal Lightning app surface separately from the guest site |
+| C | TC-013 | **Order Builder**: an internal user can build an order (select sizes/quantities via the `orderBuilder` component, backed by `Qty_S__c`/`Qty_M__c`/`Qty_L__c`) and it's reflected in `Order_Item__c` records | This is the actual mechanism behind "managing reseller orders" — the app's stated purpose — and is more central than a generic Product record edit. `orderBuilder` and `Order__c`/`Order_Item__c` have no guest sharing rules, so this is internal-only. Confirmed against the live org to be native HTML5 drag-and-drop (no "Add to Order" button); see `pages/OrderBuilderPage.ts` for the locator/interaction details. |
+| D | TC-014 | An internal user can view/edit a Product record | Baseline CRUD coverage on the internal side |
 
 ---
 
@@ -50,12 +50,18 @@ Needs a logged-in session — this is exactly what `auth.setup.ts` (Guide 1, Ste
 
 ```
 tests/
-  guest-storefront.spec.ts     ← Guest Suite tests
-  internal-app.spec.ts         ← Internal Suite tests (after auth.setup.ts exists)
+  auth.setup.ts                 ← Internal Suite login (sf CLI frontdoor bridge)
+  guest-storefront.spec.ts      ← Guest Suite tests
+  internal-app.spec.ts          ← Internal Suite tests
 pages/
-  ProductCatalogPage.ts        ← page object: catalog locators/actions (filters, search, pagination)
-  ProductDetailPage.ts         ← page object: product detail assertions
-  CreateCasePage.ts            ← page object: Create Case form + validation
+  ProductCatalogPage.ts         ← Guest Suite: catalog locators/actions (filters, search, pagination)
+  ProductDetailPage.ts          ← Guest Suite: product detail assertions
+  CreateCasePage.ts             ← Guest Suite: Create Case form + validation
+  internalSession.ts            ← shared helper: reads the internal Lightning origin auth.setup.ts persists
+  InternalCaseListPage.ts       ← Internal Suite: Case list view (TC-011)
+  ProductExplorerPage.ts        ← Internal Suite: internal Product Explorer (TC-012)
+  OrderBuilderPage.ts           ← Internal Suite: Reseller Order creation + drag-and-drop Order Builder (TC-013)
+  ProductRecordPage.ts          ← Internal Suite: Product record view/edit (TC-014)
 ```
 
 Locator strategy: prefer `page.getByRole()`, `getByText()`, `getByLabel()` over raw CSS selectors wherever the LWC markup allows it — more resistant to the superficial DOM changes a Salesforce release is likely to introduce. A couple of spots below are flagged as needing live-org confirmation because the underlying LWC markup doesn't fully determine the rendered accessible name/role (e.g., whether the product tile's `<a>` gets an `href`, or the exact wording of a required-field error).
@@ -72,7 +78,7 @@ Every test run captures a screenshot (pass or fail) and, on failure, video and a
 
 **Guide 3: Requirements Traceability** — maps each test case above to a tracked requirement ID and its live-org-verified status.
 
-**Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts` is built and verified; unblocks writing the Internal Suite's test file.
+**Guide 4: Authentication & Test Session Strategy** — `auth.setup.ts` is built and verified, unblocking the Internal Suite's test file above.
 
 **Guide 5: Visual Reporting & Trace Debugging** — screenshot/video/trace capture config and the troubleshooting workflow, applying to both suites.
 

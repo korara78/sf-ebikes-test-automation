@@ -71,27 +71,30 @@ export const guestSuite = [
 export const internalSuite = [
   {
     reqId: 'REQ-CASE-001',
-    testIds: [],
+    testIds: ['TC-011'],
     requirement: 'A case submitted as a guest actually appears in the internal Case list',
     notes:
-      'Blocked on `auth.setup.ts`. Already indirectly evidenced: SOQL queries used to verify REQ-CASE-002 confirm guest-submitted Cases are visible internally with ownership reassigned, but no Playwright test exercises the internal Lightning UI yet.'
+      'Submits a real guest Case with a unique Subject (fresh browser context, no storageState — a true guest, not the internal-authenticated `page`), looks up its Case Number via `sf data query`, then confirms it in `AllOpenCases`. The list has 50+ lazy-loaded rows sorted by Case Number; a fresh Case isn\'t in the initially-rendered rows and the list\'s own "Search this list..." box returns 0 results for several seconds (server-side search-index lag). Sorting by Case Number descending is deterministic instead, since Case Numbers are sequential — the newest Case is always row 1.'
   },
   {
     reqId: 'REQ-PRODUCT-001',
-    testIds: [],
+    testIds: ['TC-012'],
     requirement: 'Product Explorer loads real product data for an internal user',
-    notes: '—'
+    notes:
+      'The internal "Product Explorer" nav tab (`/lightning/n/Product_Explorer`) is a different origin/URL than the guest catalog, though built on the same `c-product-tile`/`c-product-tile-list` LWCs. Selecting a tile populates a `c-product-card` detail panel headed by the product name — distinct from the guest catalog\'s plain `<article>` master-detail panel.'
   },
   {
     reqId: 'REQ-ORDER-001',
-    testIds: [],
+    testIds: ['TC-013'],
     requirement: 'An internal user can build an order via the `orderBuilder` component',
-    notes: '—'
+    notes:
+      'The most involved test in the suite. Order Builder is real (native) HTML5 drag-and-drop, and `c-product-tile`/`c-order-item-tile` use genuine (non-synthetic) shadow DOM. Playwright\'s `locator.dragTo()` reliably drags the *wrong* product regardless of which tile is targeted — reproduced repeatedly against this specific component; manually dispatching dragstart/dragenter/dragover/drop/dragend with one shared `DataTransfer` on the tile\'s actual draggable node (inside its shadow root, not the custom element host) works correctly every time. Dropping a tile creates an `Order_Item__c` immediately with `Price__c` defaulted to `round(MSRP * 0.6)`; "Total Items" in the header sums Small+Medium+Large quantities, not a line-item count. Persistence of a quantity edit is verified via SOQL rather than `page.reload()`: reloading this specific record page intermittently throws a real app-level LWC `@wire` error (`force:ldsBindings` failing on `this.objectInfo.data.defaultRecordTypeId`), reproduced on WebKit — a bug in the deployed component, not something a test should route around by reloading.'
   },
   {
     reqId: 'REQ-PRODUCT-002',
-    testIds: [],
+    testIds: ['TC-014'],
     requirement: 'An internal user can view/edit a Product record',
-    notes: '—'
+    notes:
+      'Both the top-right "Edit" button and every per-field pencil icon open the same full-record modal (`Edit {ProductName}`) — there\'s no separate lightweight per-field popover despite the pencil icons suggesting one.'
   }
 ];

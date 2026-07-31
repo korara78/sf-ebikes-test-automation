@@ -202,7 +202,10 @@ function main() {
         ].join('\n')
       : '';
 
-  const confirmedCount = guestSuite.filter(
+  const guestConfirmedCount = guestSuite.filter(
+    (r) => deriveRowStatus(r.testIds, tagIndex).badge === '✅ Confirmed'
+  ).length;
+  const internalConfirmedCount = internalSuite.filter(
     (r) => deriveRowStatus(r.testIds, tagIndex).badge === '✅ Confirmed'
   ).length;
   const regressionCount = allRows.filter(
@@ -216,7 +219,7 @@ function main() {
     minute: '2-digit'
   });
 
-  const summary = `**Status:** ${confirmedCount}/${guestSuite.length} Guest Suite requirements confirmed${
+  const summary = `**Status:** ${guestConfirmedCount}/${guestSuite.length} Guest Suite + ${internalConfirmedCount}/${internalSuite.length} Internal Suite requirements confirmed${
     regressionCount > 0 ? `, **${regressionCount} regression(s) detected**` : ''
   } — matrix auto-generated ${generatedAt} from the latest test run`;
 
