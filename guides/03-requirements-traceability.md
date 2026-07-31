@@ -23,7 +23,7 @@ This is a **Living Traceability Matrix** — the tables below are generated, not
 - ❌ **Known Gap** — last run failed, but that failure is the *expected* outcome (the test is wrapped in `test.fail()`, documenting a real platform gap rather than papering over it)
 - 🔴 **Regression** — last run's result didn't match what was expected, in either direction — including a Known Gap test that started *unexpectedly passing*, which is exactly the signal to revisit that requirement
 - ⚪ **Not Run** — no matching result in the latest `test-results/results.json`
-- 🚧 **Deferred** — no test exists yet (Internal Suite, blocked on `auth.setup.ts`)
+- 🚧 **Deferred** — no test written yet for this requirement
 
 <!-- LTM:DRIFT:START -->
 
@@ -48,7 +48,7 @@ This is a **Living Traceability Matrix** — the tables below are generated, not
 
 ---
 
-## Internal Suite — Internal Lightning App (deferred)
+## Internal Suite — Internal Lightning App
 
 <!-- LTM:INTERNAL:START -->
 | ID | Test&nbsp;ID | Requirement | Status | Notes |

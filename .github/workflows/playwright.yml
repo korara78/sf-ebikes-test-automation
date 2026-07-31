@@ -17,11 +17,25 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+    - name: Install Salesforce CLI
+      run: npm install --global @salesforce/cli
+    - name: Authenticate to Salesforce via JWT Bearer Flow
+      # Headless CI auth — a Connected App with a self-signed cert, distinct
+      # from the local sf-CLI-piggyback approach `auth.setup.ts` uses when
+      # run on a machine that's already interactively logged in (see Guide 4).
+      # Aliased as `mydevorg` to match auth.setup.ts's default SF_TARGET_ORG,
+      # so no further config is needed for it to pick this session up.
+      run: |
+        echo "${{ secrets.SF_JWT_KEY }}" > server.key
+        sf org login jwt \
+          --client-id "${{ secrets.SF_CONSUMER_KEY }}" \
+          --jwt-key-file server.key \
+          --username "${{ secrets.SF_USERNAME }}" \
+          --instance-url "${{ secrets.SF_LOGIN_URL }}" \
+          --alias mydevorg
+        rm -f server.key
     - name: Run Playwright tests
-      # Guest Suite only: the Internal Suite's `setup` project shells out to
-      # the `sf` CLI, which isn't installed/authenticated in CI (see Guide 4).
-      # Revisit once Internal Suite CI credentialing is wired up.
-      run: npx playwright test --project=chromium --project=firefox --project=webkit
+      run: npx playwright test
       env:
         E_BIKES_BASE_URL: ${{ secrets.E_BIKES_BASE_URL }}
     - uses: actions/upload-artifact@v7
