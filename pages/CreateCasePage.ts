@@ -23,6 +23,10 @@ import { Page, Locator, Request, expect } from '@playwright/test';
  *   org's rendered form — submitting with both blank still creates a
  *   Case (confirmed via SOQL: multiple blank-subject Cases exist from
  *   guest submissions). This is a real gap, not a test bug.
+ * - The rendered form has exactly four fields: Priority (combobox,
+ *   defaults to "Medium"), Case Reason (combobox, defaults to "--None--"),
+ *   Subject, and Description. There is no Category or Product field on
+ *   this form at all — confirmed against the live org's rendered DOM.
  */
 export class CreateCasePage {
   readonly page: Page;
@@ -31,15 +35,6 @@ export class CreateCasePage {
   readonly descriptionInput: Locator;
   readonly priorityCombobox: Locator;
   readonly reasonCombobox: Locator;
-  /** TODO: confirm rendered label — best guess is "Case Category". */
-  readonly categoryCombobox: Locator;
-  /**
-   * Product is a lookup field (relationship to Product__c). TODO: confirm
-   * whether lightning-input-field renders this as a record-picker
-   * combobox with typeahead — if so, fillProduct() below will need to
-   * type a search term and select a suggestion rather than a plain fill.
-   */
-  readonly productLookup: Locator;
 
   readonly submitButton: Locator;
 
@@ -50,9 +45,7 @@ export class CreateCasePage {
     this.subjectInput = page.getByLabel('Subject');
     this.descriptionInput = page.getByLabel('Description');
     this.priorityCombobox = page.getByLabel('Priority');
-    this.reasonCombobox = page.getByLabel('Reason');
-    this.categoryCombobox = page.getByLabel('Case Category');
-    this.productLookup = page.getByLabel('Product');
+    this.reasonCombobox = page.getByLabel('Case Reason');
     this.submitButton = page.getByRole('button', { name: 'Submit' });
   }
 

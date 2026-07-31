@@ -12,10 +12,8 @@ import { CreateCasePage } from '../pages/CreateCasePage';
  * goto() must NOT start with a leading slash, or they'll resolve against
  * the origin and skip the `/ebikes/s/` prefix.
  *
- * A few locators below are marked TODO — they're best guesses from the
- * E-Bikes LWC source, not confirmed against the actual rendered DOM of
- * your deployed org. Run headed (`npx playwright test --headed --debug`)
- * on the first pass and adjust anything that doesn't match.
+ * All locators below are confirmed against the live deployed org's
+ * rendered DOM (see ProductCatalogPage / ProductDetailPage / CreateCasePage).
  */
 
 test.describe('Product catalog', () => {
@@ -46,7 +44,7 @@ test.describe('Product catalog', () => {
 
     await detail.expectName('FUSE X1');
     // MSRP__c for FUSE X1 is 2500 in the sample data; currency formatting
-    // has maximum-fraction-digits="0". TODO: confirm exact rendered string.
+    // has maximum-fraction-digits="0" (confirmed rendered as "$2,500").
     await detail.expectMsrp('$2,500');
   });
 
@@ -120,8 +118,9 @@ test.describe('Create Case (guest)', () => {
 
     await createCase.fillSubject(subject);
     await createCase.fillDescription(description);
-    // TODO: Priority/Reason/Category/Product are comboboxes/lookups —
-    // fill in the actual interaction once the live markup is confirmed.
+    // Priority/Case Reason are left at their defaults (Medium/--None--).
+    // Confirmed against the live org: this form has no Category or
+    // Product field at all, so there's nothing else to fill in here.
     await createCase.submit();
 
     await createCase.expectSubmissionSucceeded({ subject, description });
