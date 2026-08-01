@@ -64,17 +64,25 @@ pages/
   ProductRecordPage.ts          ← Internal Suite: Product record view/edit (TC-014)
 ```
 
-Locator strategy: prefer `page.getByRole()`, `getByText()`, `getByLabel()` over raw CSS selectors wherever the LWC markup allows it — more resistant to the superficial DOM changes a Salesforce release is likely to introduce. A couple of spots below are flagged as needing live-org confirmation because the underlying LWC markup doesn't fully determine the rendered accessible name/role (e.g., whether the product tile's `<a>` gets an `href`, or the exact wording of a required-field error).
-
 ---
 
-## Shadow DOM Workaround: Accessing the Real Draggable Node
+## Salesforce Changes Mitigation Strategy
 
-Order Builder's `c-product-tile`/`c-order-item-tile` (TC-013) use genuine, native (open) shadow DOM — not LWC's usual synthetic-shadow polyfill. That matters for automation specifically: Playwright's built-in `locator.dragTo()` computes its drag coordinates against the custom element host (the visible "outer wrapper"), not the real draggable node hidden inside that element's shadow root — so it reliably grabs the wrong product tile, every time, regardless of which one is targeted.
+Salesforce releases, LWC's rendering model, and the platform's own DOM quirks change things out from under a test suite that wasn't written defensively — a raw CSS selector, a hardcoded record Id, or a naive drag-and-drop call all break for different Salesforce-specific reasons. Each subsection below names the specific failure mode first, then the countermeasure actually used against it in this repo.
+
+### Locator Strategy
+
+**Failure mode:** raw CSS selectors and generated identifiers are the least stable things to anchor on in a Salesforce org. Salesforce record Ids (`Case.Id`, `Product__c.Id`, etc.) regenerate per org and per record, so any locator built on one breaks the moment a test creates fresh data. SLDS/Aura markup and CSS classes are also free to shift between Salesforce releases without any change to the LWC's actual behavior.
+
+**Countermeasure:** prefer `page.getByRole()`, `getByText()`, `getByLabel()` over raw CSS selectors wherever the LWC markup allows it — locators anchored to accessible role/name/label are resistant to the superficial DOM changes a Salesforce release is likely to introduce, and never touch record Ids at all. A couple of spots below are flagged as needing live-org confirmation because the underlying LWC markup doesn't fully determine the rendered accessible name/role (e.g., whether the product tile's `<a>` gets an `href`, or the exact wording of a required-field error).
+
+### Shadow DOM Workaround: Accessing the Real Draggable Node
+
+**Failure mode:** Order Builder's `c-product-tile`/`c-order-item-tile` (TC-013) use genuine, native (open) shadow DOM — not LWC's usual synthetic-shadow polyfill. Playwright's built-in `locator.dragTo()` computes its drag coordinates against the custom element host (the visible "outer wrapper"), not the real draggable node hidden inside that element's shadow root — so it reliably grabs the wrong product tile, every time, regardless of which one is targeted.
 
 ![dragTo() grabs the wrong box because it targets the outer wrapper; manually dispatching drag events on the real draggable node inside the shadow root grabs the correct item every time](../guides-assets/shadow-dom-drag-workaround.png)
 
-The fix (`pages/OrderBuilderPage.ts:106-158`) bypasses the wrapper entirely rather than fighting it: a shadow-root-aware deep query (`deepQueryAll`) walks into the tile's actual shadow root to find the real draggable node, then manually dispatches the native drag event sequence (`dragstart`/`dragenter`/`dragover`/`drop`/`dragend`) with one shared `DataTransfer` object across both the source and drop-zone nodes — mirroring exactly what a real browser drag does natively, just without relying on `dragTo()`'s coordinate-based targeting to find the right element first.
+**Countermeasure:** bypass the wrapper entirely rather than fighting it. The fix (`pages/OrderBuilderPage.ts:106-158`) uses a shadow-root-aware deep query (`deepQueryAll`) to walk into the tile's actual shadow root and find the real draggable node, then manually dispatches the native drag event sequence (`dragstart`/`dragenter`/`dragover`/`drop`/`dragend`) with one shared `DataTransfer` object across both the source and drop-zone nodes — mirroring exactly what a real browser drag does natively, just without relying on `dragTo()`'s coordinate-based targeting to find the right element first.
 
 ---
 
