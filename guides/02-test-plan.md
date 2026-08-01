@@ -78,6 +78,16 @@ Salesforce releases, LWC's rendering model, and the platform's own DOM quirks ch
 
 ### Shadow DOM Workaround: Accessing the Real Draggable Node
 
+**The concept, in three doors:**
+
+- **Door 1 — Light DOM. No barrier at all.** You speak your question directly at the door, and the person behind it answers verbally, right away. This is a normal `document.querySelector()` — it just asks, and gets a direct answer.
+- **Door 2 — Open shadow root.** The door itself is shut, but it has a hatch — a specific, defined channel anyone can use to pass a note through and get one back. You can't just knock and talk normally anymore (`document.querySelector()` alone won't work), but anyone who knows to use the hatch (`element.shadowRoot`) can reach through it, no special permission required.
+  - Playwright can pierce this automatically. Its own locators (`page.locator()`, `getByRole()`, plain CSS selectors) already know how to use the hatch on their own — no special code needed.
+  - Playwright can also be manually driven through it, when you need something its high-level API doesn't offer — dropping into `page.evaluate()` and calling `element.shadowRoot.querySelector(...)` yourself, exactly what your Order Builder fix's `deepQueryAll` does.
+- **Door 3 — Closed shadow root.** Same door, same hatch — but this hatch is locked, and no key exists on the outside at all. Only the person who lives behind the door (the component's own internal code, which privately holds the only key from the moment it was built) can ever use that hatch.
+  - Playwright cannot pierce this — `element.shadowRoot` returns `null` for a closed root, for Playwright's locators and for manual `page.evaluate()` code alike. No sanctioned channel exists from the outside.
+  - The only workaround is intercepting the door's construction itself — patching the browser's `attachShadow()` function before the component runs, to secretly force it open or capture a reference — a fragile, unofficial approach, not something Playwright supports natively.
+
 **Failure mode:** Order Builder's `c-product-tile`/`c-order-item-tile` (TC-013) use genuine, native (open) shadow DOM — not LWC's usual synthetic-shadow polyfill. Playwright's built-in `locator.dragTo()` computes its drag coordinates against the custom element host (the visible "outer wrapper"), not the real draggable node hidden inside that element's shadow root — so it reliably grabs the wrong product tile, every time, regardless of which one is targeted.
 
 ![dragTo() grabs the wrong box because it targets the outer wrapper; manually dispatching drag events on the real draggable node inside the shadow root grabs the correct item every time](../guides-assets/shadow-dom-drag-workaround.png)
