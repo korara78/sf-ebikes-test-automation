@@ -68,6 +68,16 @@ Locator strategy: prefer `page.getByRole()`, `getByText()`, `getByLabel()` over 
 
 ---
 
+## Shadow DOM Workaround: Accessing the Real Draggable Node
+
+Order Builder's `c-product-tile`/`c-order-item-tile` (TC-013) use genuine, native (open) shadow DOM — not LWC's usual synthetic-shadow polyfill. That matters for automation specifically: Playwright's built-in `locator.dragTo()` computes its drag coordinates against the custom element host (the visible "outer wrapper"), not the real draggable node hidden inside that element's shadow root — so it reliably grabs the wrong product tile, every time, regardless of which one is targeted.
+
+![dragTo() grabs the wrong box because it targets the outer wrapper; manually dispatching drag events on the real draggable node inside the shadow root grabs the correct item every time](../guides-assets/shadow-dom-drag-workaround.png)
+
+The fix (`pages/OrderBuilderPage.ts:106-158`) bypasses the wrapper entirely rather than fighting it: a shadow-root-aware deep query (`deepQueryAll`) walks into the tile's actual shadow root to find the real draggable node, then manually dispatches the native drag event sequence (`dragstart`/`dragenter`/`dragover`/`drop`/`dragend`) with one shared `DataTransfer` object across both the source and drop-zone nodes — mirroring exactly what a real browser drag does natively, just without relying on `dragTo()`'s coordinate-based targeting to find the right element first.
+
+---
+
 ## Reporting & Diagnostics
 
 Every test run captures a screenshot (pass or fail) and, on failure, video and a trace — see [Guide 5](05-visual-reporting-and-debugging.md) for the full config and the troubleshooting workflow (screenshot first, then `trace.zip` if that's not enough). This applies uniformly across both suites, not just Guest.
