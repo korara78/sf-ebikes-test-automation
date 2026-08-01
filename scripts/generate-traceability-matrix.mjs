@@ -138,7 +138,7 @@ function escapeCell(text) {
 
 function renderTable(rows, tagIndex, { includeNotesColumn = true } = {}) {
   const header = includeNotesColumn
-    ? '| ID | Test&nbsp;ID | Requirement | Status | Notes |\n|---|---|---|---|---|'
+    ? '| ID | Test&nbsp;ID | Requirement | Status | Expected&nbsp;Behavior |\n|---|---|---|---|---|'
     : '| ID | Test&nbsp;ID | Requirement | Status |\n|---|---|---|---|';
 
   const lines = rows.map((row) => {
