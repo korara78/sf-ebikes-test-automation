@@ -206,7 +206,7 @@ export const a11ySuite = [
     requirement: 'Internal Product Explorer has no WCAG 2.1/2.2 Level A/AA violations',
     scope: 'Platform (Salesforce)',
     notes:
-      "Two app-level gaps here originally — the same paginator icon button as the Guest catalog, plus a separate action icon button on the product detail card, both missing `alternative-text` (`button-name`, WCAG 2.1 A, critical) — are now fixed in ebikes-lwc and confirmed clean. One platform-level gap remains: the global favorites-star button in Salesforce's own Lightning chrome is under the WCAG 2.2 minimum touch target size (`target-size`, WCAG 2.2 AA, serious) — not something this app's code can fix, since it isn't this app's markup."
+      "The favorites-star icon in Salesforce's own page chrome is smaller than WCAG's minimum tappable size, so it's easy to mis-tap on a touchscreen. It's Salesforce's own markup, not this app's, so there's nothing to fix here."
   },
   {
     reqId: 'REQ-A11Y-004',
@@ -222,7 +222,7 @@ export const a11ySuite = [
     requirement: 'Internal Product record view has no WCAG 2.1/2.2 Level A/AA violations',
     scope: 'Platform (Salesforce)',
     notes:
-      "Only the global favorites-star touch-target gap (`target-size`, WCAG 2.2 AA, serious) — Salesforce's own Lightning chrome, not this app's markup."
+      "The favorites-star icon in Salesforce's own page chrome is smaller than WCAG's minimum tappable size, so it's easy to mis-tap on a touchscreen. It's Salesforce's own markup, not this app's, so there's nothing to fix here."
   },
   {
     reqId: 'REQ-A11Y-006',
@@ -230,6 +230,6 @@ export const a11ySuite = [
     requirement: 'Internal Case list has no WCAG 2.1/2.2 Level A/AA violations',
     scope: 'Platform (Salesforce)',
     notes:
-      "Only the global favorites-star touch-target gap (`target-size`, WCAG 2.2 AA, serious) — Salesforce's own Lightning chrome, not this app's markup."
+      "The favorites-star icon in Salesforce's own page chrome is smaller than WCAG's minimum tappable size, so it's easy to mis-tap on a touchscreen. It's Salesforce's own markup, not this app's, so there's nothing to fix here."
   }
 ];
