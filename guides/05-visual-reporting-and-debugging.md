@@ -55,6 +55,20 @@ npx playwright show-trace test-results/<test-folder>/trace.zip
 
 ---
 
+## Demoing the Failure Pipeline On Demand
+
+The real suites are fully green (51/51 confirmed), which is good for the app but means there's no live failure sitting around to walk through when explaining this reporting setup. `tests/reporting-demo.spec.ts` exists purely to produce one on demand: a deliberately, deterministically wrong assertion against the Guest catalog's product count, run via its own isolated config:
+
+```bash
+npm run demo:failure
+```
+
+It's intentionally kept separate from everything above — no `@TC-###` tag, not mapped in `guides/traceability-map.mjs`, and not picked up by `playwright.config.ts` (every project there is scoped via `testMatch` to one specific real spec file, so this one matches none of them and never runs as part of `npx playwright test` or CI). It has its own `playwright.demo.config.ts` and writes to `test-results/demo/` / `playwright-report/demo/`, so a demo run never touches the real suite's tracked `test-results/results.json` or overwrites its HTML report.
+
+One deliberate difference from the rest of this project: it's **not** wrapped in `test.fail()`. That convention (used for `REQ-CASE-003`) marks a failure as expected, and Playwright's video/trace retention logic treats an expected failure the same as a pass for retention purposes — no video gets kept. Since this test's entire purpose is showing off the artifact pipeline, it needs to be a genuine, unexpected failure instead, which is what actually triggers `retain-on-failure` video and `on-first-retry` trace capture.
+
+---
+
 ## Troubleshooting a Failure: Read the Artifacts, Don't Just Trust the Error Text
 
 The console/report error message (assertion diff, stack trace) is the first thing to check and is usually enough. But when it isn't — e.g. a selector matched the wrong element, or a filter didn't visually update the way the assertion expected — go straight to the actual artifacts rather than guessing from the error text alone:
