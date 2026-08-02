@@ -27,6 +27,8 @@ Branch protection on `main`, applied via the GitHub API (`PUT /repos/.../branche
 
 **Deliberately not done:** fabricating a second contributor identity to make PRs look like they were reviewed by someone else. That would misrepresent the project's actual provenance — a solo project claiming multi-person review is a real problem if it ever came up in an interview, not a portfolio flex. Self-review (diff + CI status, then merge your own PR) is honest, normal for a solo repo, and exactly what `required_approving_review_count: 0` is configured for.
 
+**One consequence, wired up right after this:** `.github/workflows/playwright.yml`'s `push` trigger was removed entirely — branch protection means the only thing that could ever push directly to `main`/`master` is a merge, already verified by its own PR run, so a separate push-triggered re-run was pure redundant load on the live org. It's not carried over to feature branches either: `pull_request`'s own `synchronize` event already re-runs CI on every commit pushed to an open PR, so a parallel `push` trigger there would just double-fire on every commit. CI now runs exactly once per meaningful event — a PR opening or getting a new commit — never on a bare push to any branch.
+
 ---
 
 ## The Workflow, Solo
