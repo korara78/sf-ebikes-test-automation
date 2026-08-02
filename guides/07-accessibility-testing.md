@@ -99,4 +99,4 @@ CI needs no changes — `.github/workflows/playwright.yml` already runs `npx pla
 
 ## What This Unblocked
 
-Nothing downstream — this is currently the last guide. All five suites (Guest, Internal, API, Penetration, Accessibility) are now built, wired into CI, and confirmed passing against the live org; Guide 3's traceability tables reflect the current confirmed state.
+[Guide 8: Git Workflow (GitHub Flow)](08-git-workflow.md) — all five suites (Guest, Internal, API, Penetration, Accessibility) are now built, wired into CI, and confirmed passing against the live org; Guide 3's traceability tables reflect the current confirmed state. What changed after this guide isn't another suite, but how changes reach `main` at all.
