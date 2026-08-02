@@ -102,6 +102,24 @@ Every test run captures a screenshot (pass or fail) and, on failure, video and a
 
 ---
 
+## Test Data Isolation: The FUSE X1 Concurrency Incident
+
+A real, live-org-confirmed data-corruption bug, investigated after CI started failing in a way that initially looked unrelated across four different tests at once.
+
+**Symptom:** `TC-013` (Order Builder), `TC-015` (API MSRP query), and `TC-027` (Accessibility Product Explorer scan) all started failing in the same CI runs — three tests in three different suites, with no code in common. `TC-014` (Product record edit) was failing too, but that looked like the odd one out rather than the actual cause.
+
+**Root cause, confirmed via direct SOQL against the live org:** `Product__c` "FUSE X1" — a reference product `TC-013`/`TC-015`/`TC-027` all look up by that exact literal Name, for entirely unrelated reasons — had its Name field corrupted to `"FUSE X1Internal Suite edit check 1785652328240"`. `TC-014` is the only test in the whole suite that writes to `Product__c` at all: it edits the Description field, and something concatenated that edit's generated text onto Name instead.
+
+The first theory (a Playwright locator matching the wrong field in the DOM) turned out to be wrong — scoping `ProductRecordPage.fieldInput()` to the edit modal specifically didn't stop it from recurring. The actual proof came from the corrupted value itself: **the timestamp embedded in the corrupted Name didn't match the timestamp in Description on the same record** — two different `Date.now()`-generated strings, meaning two *separate, overlapping executions* of `TC-014` had written to the same record concurrently. Most likely: a local verification run and the CI run it had just triggered, both hitting the same live personal Dev Edition org's `FUSE X1` record at the same time.
+
+**Two separate fixes, addressing two separate risks:**
+1. `.github/workflows/playwright.yml` got a `concurrency` guard so two GitHub Actions runs can never execute against the org simultaneously — confirmed to matter: two runs triggered back-to-back (a manual rerun overlapping an in-progress one) produced measurably broader, slower failures than either alone.
+2. That guard does **not** cover a local run overlapping the CI run it just triggered — there's no way to prevent that from code alone, only by not running the local suite again immediately after pushing. Given that risk can't be fully eliminated, `TC-014` was moved to edit `FUSE X2` instead of `FUSE X1` — decoupling it from the three tests that depend on `FUSE X1`'s exact Name. This doesn't prevent the underlying race; it contains the blast radius to `TC-014` itself if it recurs, instead of cascading into three unrelated-looking failures. `TC-014` also now verifies via SOQL that its target record's Name is unchanged immediately after saving, so a recurrence fails loudly in the one test responsible rather than silently corrupting shared data.
+
+**The general lesson, worth keeping in mind for any new test:** a record that gets *read* by many tests via a hardcoded literal name, and *written* by even one test, is a structural risk — not because the write test's logic is wrong, but because "many readers, one writer, shared live mutable state" is exactly the shape of bug that only shows up under conditions (timing, concurrency) that a single clean run won't reproduce. Preferring a dedicated, non-shared record for anything a test needs to mutate — the same instinct already applied elsewhere in this repo (the API Suite creates and deletes its own Case rather than touching a shared one) — avoids the whole class, not just this one instance of it.
+
+---
+
 ## Next Guide
 
 **Guide 3: Requirements Traceability** — maps each test case above to a tracked requirement ID and its live-org-verified status.
