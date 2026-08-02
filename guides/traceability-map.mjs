@@ -158,6 +158,20 @@ export const authzSuite = [
       'A guest cannot set a field absent from the Create Case form via a tampered createRecord payload (mass assignment / Broken Object Property Level Authorization)',
     notes:
       "A guest tries to sneak an unauthorized field (`IsEscalated`) into a Case-creation request. Salesforce rejects the entire request outright instead of silently dropping the field — no Case gets created at all."
+  },
+  {
+    reqId: 'REQ-AUTHZ-004',
+    testIds: ['TC-029'],
+    requirement: 'The guest site sets Content-Security-Policy, X-Frame-Options, and Strict-Transport-Security headers on its main document response',
+    notes:
+      "All three headers are already present, confirmed by inspecting the live response directly — Salesforce Experience Cloud sets them automatically as platform defaults, not something this app configured. A positive confirmation, not a gap: CSP is the safety net that blocks an injected script from executing even if input escaping has a gap elsewhere, X-Frame-Options blocks this site being clickjacked inside a malicious iframe, and HSTS blocks an SSL-stripping downgrade on the very first connection."
+  },
+  {
+    reqId: 'REQ-AUTHZ-005',
+    testIds: ['TC-030'],
+    requirement: "A guest-submitted `<script>` payload in Case Subject does not execute in an internal agent's view (stored XSS)",
+    notes:
+      "Submits `<script>window.__xssFired=true</script>...` as a guest, then views the same Case as an internal user and checks directly whether the script actually executed (not just whether the raw tag appears in the HTML). It does render into the page — inside Salesforce's own `lightning-formatted-text` component, which HTML-entity-escapes it — but never executes. A positive confirmation of the platform's default escaping, not a gap."
   }
 ];
 

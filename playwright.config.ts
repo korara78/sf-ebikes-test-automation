@@ -115,12 +115,16 @@ export default defineConfig({
      * browser (fresh guest contexts + page.route() tampering), but only
      * one engine: these tests probe server-side authorization enforcement,
      * not rendering, so multiplying across browsers would just be slower
-     * without adding coverage. No `setup` dependency — every test here is
-     * deliberately unauthenticated/guest, never the Internal Suite's
-     * storageState. */
+     * without adding coverage. Depends on `setup` so its storageState file
+     * exists in time for TC-030, the one test in this suite that needs the
+     * internal session (to confirm a guest-submitted XSS payload doesn't
+     * execute in an internal agent's view) — every other test here still
+     * creates its own fresh, unauthenticated guest context by default;
+     * only TC-030 opts into storageState via a per-test `test.use()`. */
     {
       name: 'penetration',
       testMatch: /penetration\.spec\.ts/,
+      dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'] },
     },
 

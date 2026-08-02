@@ -1,7 +1,7 @@
 # Guide 6: API & Authorization Boundary Testing
 
 **Project:** Salesforce LWC Test Automation Portfolio (E-Bikes)
-**Status:** ✅ Built and verified against the live org — all 8 tests (API Suite + Penetration Suite) confirmed passing, including one real fix and one genuine security finding surfaced by the first live run (see below).
+**Status:** ✅ Built and verified against the live org — all 10 tests (API Suite + Penetration Suite) confirmed passing, including one real fix and one genuine security finding surfaced by the first live run (see below), plus two positive confirmations (security response headers, stored-XSS escaping) added afterward.
 
 ---
 
@@ -13,6 +13,8 @@ The goal going in was explicitly *not* generic endpoint smoke tests ("hit an end
 
 1. **What server-side API surface E-Bikes actually has** — determined by reading the Apex source in the sibling `ebikes-lwc` checkout, not assumed.
 2. **What the guest profile's metadata claims to enforce** — also read directly, then tested empirically rather than trusted on paper. A failing assertion in the Penetration Suite is a real, reportable finding (in OWASP API Security Top 10 terms), not a test bug — the same investigative posture Guide 3 already established for REQ-CASE-002/003.
+
+Two tests added after the initial build (`TC-029`/`TC-030`) broaden that framing slightly: missing security response headers and stored-input escaping are general **OWASP Top 10 (web)** concerns, not API-specific ones. Same investigative posture either way — verify the boundary actually holds by running the probe against the live org, don't assume it from documentation. Both came back as **positive confirmations** rather than gaps: this org's platform defaults (Experience Cloud's automatic security headers, Salesforce's default field-rendering escaping) already hold. That's still a legitimate, worthwhile finding to lock in with a test — it's the thing that would catch a regression if either default ever got silently disabled.
 
 ---
 
@@ -83,13 +85,15 @@ Unlike every other suite here, the delete test's record doesn't get left behind 
 
 ## The Penetration Suite (`tests/penetration.spec.ts`)
 
-Three tests (TC-020–TC-022), each a fresh, `storageState`-less guest browser context (same "true guest" pattern as REQ-CASE-001 in `internal-app.spec.ts`), never the bearer token above:
+Five tests (TC-020–TC-022, TC-029–TC-030). TC-020–022 and TC-029 each use a fresh, `storageState`-less guest browser context (same "true guest" pattern as REQ-CASE-001 in `internal-app.spec.ts`), never the bearer token above:
 
 1. **TC-020 — REST API reachability.** A real guest page visit establishes actual session cookies; `browserContext.request` shares those cookies automatically (it's the same context), so `guestContext.request.get(...)` against the community site's own origin is exactly what a guest's browser could reach unassisted. Expects the standard REST API to be unreachable.
 2. **TC-021 — cross-record read (IDOR).** Same cookie-sharing mechanism, aimed at the UI API (`/ui-api/records/<id>`) for the most recently created Case in the org (there's always one — every suite here leaves Cases behind). Expects a guest to be refused a Case it didn't create.
 3. **TC-022 — mass assignment / BOPLA on Case creation.** Reuses the exact `aura://RecordUiController/ACTION$createRecord` payload shape `CreateCasePage` already parses for REQ-CASE-002, but via `page.route()` instead of the passive `waitForRequest` used there — intercepts the real request, injects `Case.IsEscalated: true` (a real field, absent from the rendered form, not editable per the guest profile's field-level security), and lets it continue.
 
    **Confirmed against the live org:** Lightning Data Service doesn't silently drop the inaccessible field and create the Case anyway — it rejects the **entire request outright**, and the UI surfaces exactly that: *"An error occurred while trying to update the record. Please try again. Unable to create/update fields: IsEscalated. Please check the security settings of this field and verify that it is read/write for your profile or permission set."* No Case is created at all. The test asserts this directly (SOQL confirms zero matching Cases; the captured Aura response body contains the string `IsEscalated`) rather than the two hypothetical outcomes originally considered when this test was written — a stronger, more specific secure result than either.
+4. **TC-029 — security response headers.** A real guest page visit's main document response is inspected directly for `Content-Security-Policy`, `X-Frame-Options`, and `Strict-Transport-Security`. **Confirmed against the live org, verified before writing any assertion:** all three (plus `X-Content-Type-Options: nosniff`, not even originally in scope) are already present — Salesforce Experience Cloud sets them automatically. Not a gap; a positive confirmation, kept as a test specifically so a future regression (a security setting disabled in Setup) gets caught rather than passing silently.
+5. **TC-030 — stored XSS via Case Subject.** The one test in this suite that also needs the Internal Suite's session: submits `<script>window.__xssFired=true</script>...` as a guest Case Subject, then opens a second `browser.newContext({ storageState: ... })` to view the same Case as an internal agent — the realistic target of a stored-XSS attack, not the guest who submitted it. Checks `window.__xssFired` directly (real JS execution), not just whether an unescaped `<script>` tag appears in the HTML. **Confirmed against the live org:** the payload does render into the page, inside Salesforce's own `lightning-formatted-text` component — but HTML-entity-escaped, so the script never executes. Also a positive confirmation, not a gap.
 
 A version-discovery subtlety worth calling out: TC-020/021 resolve the API version path once via the *admin* session (always reachable), then apply that same path string to the guest's own origin — resolving it via the guest origin directly would be circular, since whether that origin proxies `/services/data` at all is exactly what TC-020 tests.
 
@@ -106,7 +110,7 @@ api          → tests/api.spec.ts          (no browser/page — pure `request` 
 penetration  → tests/penetration.spec.ts  (chromium only — probes server-side authz, not rendering)
 ```
 
-Neither has a `setup` dependency: the API Suite authenticates via bearer token, not `storageState`; the Penetration Suite is deliberately unauthenticated throughout. CI needs no changes — `.github/workflows/playwright.yml` already runs `npx playwright test` unscoped, so both new projects run automatically once pushed, using the same JWT-authenticated `mydevorg` alias Guide 4 already set up.
+The API Suite has no `setup` dependency — it authenticates via bearer token, not `storageState`. The `penetration` project does depend on `setup`, added when TC-030 was added: every test in this suite still creates its own context explicitly (guest or internal), never relying on the project-level default, but TC-030 needs the Internal Suite's saved session to exist by the time it runs. CI needs no changes — `.github/workflows/playwright.yml` already runs `npx playwright test` unscoped, so both projects (and this later addition) run automatically once pushed, using the same JWT-authenticated `mydevorg` alias Guide 4 already set up.
 
 ---
 
@@ -115,6 +119,7 @@ Neither has a `setup` dependency: the API Suite authenticates via bearer token, 
 - **The bearer token from `sf org auth show-access-token` is a live, full-scoped OAuth credential**, same caveat Guide 4 already raised about the frontdoor-bridge session: broader than the operation it's used for. It's never written to disk here (unlike `storageState`) — held in memory for the duration of the test run only.
 - **This suite creates and reads real data in the personal Developer Edition org it targets.** All authorization probes here are against infrastructure the author owns and controls; none of this targets Salesforce's shared platform layer itself (which would require going through Salesforce's own security-testing authorization process, not something a personal Developer Edition login grants).
 - **A failing Penetration Suite assertion is signal, not noise.** Per the `test.fail()` convention already established in Guide 3 for REQ-CASE-003: if any of TC-020/021/022 fail once actually run, the right next step is the same investigation loop already documented there (capture the exact request/response, confirm via SOQL, decide whether it's a real gap worth wrapping in `test.fail()` or a bug in the test itself) — not to loosen the assertion until it's green. TC-022 is exactly this in practice: the first real run failed, and the right response was to understand *why* (a genuine, stronger secure outcome) and correct the assertion to match reality, not to weaken it until green.
+- **TC-029/030 are plain assertions, not `test.fail()`-wrapped** — unlike TC-020–022, they confirmed the boundary already holds rather than finding a gap. That means a failure in either one going forward is an unambiguous, immediate regression (a security header silently disabled, or escaping behavior changing), not something to investigate-then-wrap — the same posture as the Accessibility Suite's one clean result (`REQ-A11Y-002`) versus its Known Gaps.
 
 ---
 
