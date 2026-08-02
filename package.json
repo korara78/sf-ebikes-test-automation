@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "gen:matrix": "node scripts/generate-traceability-matrix.mjs",
+    "check:matrix": "node scripts/check-matrix-freshness.mjs",
     "demo:failure": "playwright test --config=playwright.demo.config.ts"
   },
   "keywords": [],

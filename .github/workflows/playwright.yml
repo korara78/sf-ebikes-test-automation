@@ -50,6 +50,16 @@ jobs:
       run: npx playwright test
       env:
         E_BIKES_BASE_URL: ${{ secrets.E_BIKES_BASE_URL }}
+    - name: Check traceability matrix is up to date
+      # Regenerates the matrix from this run's own results, then fails if
+      # the committed file doesn't match (timestamps excluded — see
+      # scripts/check-matrix-freshness.mjs). Catches the case where code or
+      # test changes were committed without also running `npm run gen:matrix`.
+      # No `if:` guard — if the test step above already failed, this job is
+      # failing regardless, so there's no need to also check matrix freshness.
+      run: |
+        npm run gen:matrix
+        npm run check:matrix
     - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
