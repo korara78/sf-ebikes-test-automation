@@ -37,8 +37,18 @@ export class ProductRecordPage {
     await this.editButton.click();
   }
 
+  /**
+   * Scoped to the edit modal (`role="dialog"`) specifically, not the page
+   * as a whole — a page-wide `getByLabel` has no structural guarantee it
+   * can only ever match a field inside the modal actually being edited.
+   * Confirmed against the live org: FUSE X1's Name field was found
+   * corrupted with this test's Description text appended to it after a
+   * CI run, root cause not conclusively pinned down — this scoping
+   * removes one plausible path to that regardless, and TC-014 now also
+   * verifies Name is unchanged after saving (see internal-app.spec.ts).
+   */
   fieldInput(label: string): Locator {
-    return this.page.getByLabel(label, { exact: true });
+    return this.page.getByRole('dialog').getByLabel(label, { exact: true });
   }
 
   async save() {

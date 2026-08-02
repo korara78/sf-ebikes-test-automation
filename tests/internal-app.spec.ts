@@ -131,5 +131,19 @@ test.describe('Product records (internal)', () => {
     await productRecord.save();
 
     await expect(page.getByText(updatedDescription)).toBeVisible({ timeout: 15000 });
+
+    // Confirmed against the live org: this test's edit was once found to
+    // have corrupted Product__c.Name instead of (or in addition to)
+    // Description — root cause not conclusively pinned down, but this
+    // record's exact Name is a hard dependency for several other tests
+    // (TC-013, TC-015, TC-027). Verifying it directly here means a
+    // recurrence fails loudly in this one test immediately, instead of
+    // silently corrupting shared data that then cascades into unrelated
+    // failures elsewhere, hours or days later, with no obvious cause.
+    const matches = sfQuery<{ Id: string }>("SELECT Id FROM Product__c WHERE Name = 'FUSE X1'");
+    expect(
+      matches.length,
+      'expected exactly one Product__c still named exactly "FUSE X1" after this edit — other tests depend on that exact name'
+    ).toBe(1);
   });
 });
