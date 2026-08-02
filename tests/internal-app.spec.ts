@@ -118,10 +118,20 @@ test.describe('Product records (internal)', () => {
     page
   }) => {
     test.slow();
+    // Deliberately NOT FUSE X1: TC-013, TC-015, and TC-027 all depend on
+    // FUSE X1's exact Name for unrelated read-only lookups. This test is
+    // the only one in the whole suite that writes to Product__c at all —
+    // confirmed against the live org that this edit can race against a
+    // second, overlapping execution of the same test (a local run and the
+    // CI run it just triggered, both hitting the same live org at once)
+    // and corrupt the record's Name field with a concatenation of two
+    // different runs' generated values. Editing a product nothing else
+    // keys off of by name contains that risk to this one test alone if it
+    // ever recurs, instead of cascading into unrelated test failures.
     const productRecord = new ProductRecordPage(page);
     await productRecord.gotoRecentList();
-    await productRecord.openProduct('FUSE X1');
-    await expect(page.getByRole('heading', { name: 'FUSE X1' })).toBeVisible({
+    await productRecord.openProduct('FUSE X2');
+    await expect(page.getByRole('heading', { name: 'FUSE X2' })).toBeVisible({
       timeout: 15000
     });
 
@@ -132,18 +142,14 @@ test.describe('Product records (internal)', () => {
 
     await expect(page.getByText(updatedDescription)).toBeVisible({ timeout: 15000 });
 
-    // Confirmed against the live org: this test's edit was once found to
-    // have corrupted Product__c.Name instead of (or in addition to)
-    // Description — root cause not conclusively pinned down, but this
-    // record's exact Name is a hard dependency for several other tests
-    // (TC-013, TC-015, TC-027). Verifying it directly here means a
-    // recurrence fails loudly in this one test immediately, instead of
-    // silently corrupting shared data that then cascades into unrelated
-    // failures elsewhere, hours or days later, with no obvious cause.
-    const matches = sfQuery<{ Id: string }>("SELECT Id FROM Product__c WHERE Name = 'FUSE X1'");
+    // Verifies Name specifically, not just that *a* Product__c exists —
+    // this is the direct signal that would catch the race above
+    // recurring, immediately and in this one test, rather than silently
+    // corrupting data that only surfaces as confusing failures elsewhere.
+    const matches = sfQuery<{ Id: string }>("SELECT Id FROM Product__c WHERE Name = 'FUSE X2'");
     expect(
       matches.length,
-      'expected exactly one Product__c still named exactly "FUSE X1" after this edit — other tests depend on that exact name'
+      'expected exactly one Product__c still named exactly "FUSE X2" after this edit — a concurrent overlapping run of this same test corrupted it once before'
     ).toBe(1);
   });
 });
