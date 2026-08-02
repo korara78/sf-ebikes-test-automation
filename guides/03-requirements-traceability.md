@@ -2,7 +2,7 @@
 
 **Project:** Salesforce LWC Test Automation Portfolio (E-Bikes)
 <!-- LTM:SUMMARY:START -->
-**Status:** 7/8 Guest Suite + 4/4 Internal Suite + 5/5 API Suite + 5/5 Penetration Suite + 3/6 Accessibility Suite requirements confirmed — matrix auto-generated 8/2/2026, 9:58 AM from the latest test run
+**Status:** 7/8 Guest Suite + 4/4 Internal Suite + 5/5 API Suite + 5/5 Penetration Suite + 3/6 Accessibility Suite requirements confirmed — matrix auto-generated 8/2/2026, 11:08 AM from the latest test run
 <!-- LTM:SUMMARY:END -->
 
 ---
@@ -102,10 +102,10 @@ Not generic endpoint smoke tests — each requirement targets a specific authori
 |---|---|---|---|---|---|
 | REQ-A11Y-001 | TC-023 | Guest catalog page has no WCAG 2.1/2.2 Level A/AA violations | ✅ Confirmed | _Last run: 8/2/2026, 9:57 AM — 1 browser._<br>Fixed. The paginator's next/previous icon button had no discernible text (axe-core `button-name`, WCAG 2.1 A, critical) — it was using a slotted `<label>` child, which `lightning-button-icon` doesn't recognize as an accessible name at all. Fixed by adding `alternative-text` in ebikes-lwc's `paginator.html`, redeployed, and confirmed clean against the live org. | — |
 | REQ-A11Y-002 | TC-024 | Guest Create Case form has no WCAG 2.1/2.2 Level A/AA violations | ✅ Confirmed | _Last run: 8/2/2026, 9:57 AM — 1 browser._<br>Clean — zero violations found. | — |
-| REQ-A11Y-003 | TC-025 | Internal Product Explorer has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | _Last run: 8/2/2026, 9:57 AM — 1 browser._<br>Two app-level gaps here originally — the same paginator icon button as the Guest catalog, plus a separate action icon button on the product detail card, both missing `alternative-text` (`button-name`, WCAG 2.1 A, critical) — are now fixed in ebikes-lwc and confirmed clean. One platform-level gap remains: the global favorites-star button in Salesforce's own Lightning chrome is under the WCAG 2.2 minimum touch target size (`target-size`, WCAG 2.2 AA, serious) — not something this app's code can fix, since it isn't this app's markup. | Platform (Salesforce) |
+| REQ-A11Y-003 | TC-025 | Internal Product Explorer has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | _Last run: 8/2/2026, 9:57 AM — 1 browser._<br>The favorites-star icon in Salesforce's own page chrome is smaller than WCAG's minimum tappable size, so it's easy to mis-tap on a touchscreen. It's Salesforce's own markup, not this app's, so there's nothing to fix here. | Platform (Salesforce) |
 | REQ-A11Y-004 | TC-026 | Internal Order Builder has no WCAG 2.1/2.2 Level A/AA violations | ✅ Confirmed | _Last run: 8/2/2026, 9:57 AM — 1 browser._<br>Fixed. Same paginator icon button gap as the Guest catalog and Product Explorer (`button-name`, WCAG 2.1 A, critical, one root-cause component, three pages affected) — fixed by adding `alternative-text` in ebikes-lwc's `paginator.html`, redeployed, and confirmed clean against the live org. | — |
-| REQ-A11Y-005 | TC-027 | Internal Product record view has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | _Last run: 8/2/2026, 9:57 AM — 1 browser._<br>Only the global favorites-star touch-target gap (`target-size`, WCAG 2.2 AA, serious) — Salesforce's own Lightning chrome, not this app's markup. | Platform (Salesforce) |
-| REQ-A11Y-006 | TC-028 | Internal Case list has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | _Last run: 8/2/2026, 9:58 AM — 1 browser._<br>Only the global favorites-star touch-target gap (`target-size`, WCAG 2.2 AA, serious) — Salesforce's own Lightning chrome, not this app's markup. | Platform (Salesforce) |
+| REQ-A11Y-005 | TC-027 | Internal Product record view has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | _Last run: 8/2/2026, 9:57 AM — 1 browser._<br>The favorites-star icon in Salesforce's own page chrome is smaller than WCAG's minimum tappable size, so it's easy to mis-tap on a touchscreen. It's Salesforce's own markup, not this app's, so there's nothing to fix here. | Platform (Salesforce) |
+| REQ-A11Y-006 | TC-028 | Internal Case list has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | _Last run: 8/2/2026, 9:58 AM — 1 browser._<br>The favorites-star icon in Salesforce's own page chrome is smaller than WCAG's minimum tappable size, so it's easy to mis-tap on a touchscreen. It's Salesforce's own markup, not this app's, so there's nothing to fix here. | Platform (Salesforce) |
 <!-- LTM:A11Y:END -->
 
 ---
