@@ -25,6 +25,22 @@ export class ProductRecordPage {
     await this.page.goto(`${origin}/lightning/o/Product__c/list?filterName=__Recent`);
   }
 
+  /**
+   * Direct-by-Id navigation, for a record whose Id is already known (e.g.
+   * one this test just created via REST) — deliberately not
+   * gotoRecentList() + name lookup. ProductController.getProducts, the
+   * Apex method backing the Guest catalog/Order Builder/Product Explorer,
+   * is @AuraEnabled(Cacheable=true) (confirmed in ebikes-lwc's source), and
+   * the standard "__Recent" list view has its own "recently viewed by this
+   * user" semantics that a raw API-created record isn't guaranteed to
+   * satisfy either. Going straight to the record's own URL by Id sidesteps
+   * both — no catalog cache, no list-view filter, nothing to wait on.
+   */
+  async gotoById(id: string) {
+    const origin = readInternalOrigin();
+    await this.page.goto(`${origin}/lightning/r/Product__c/${id}/view`);
+  }
+
   productRowByName(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
   }

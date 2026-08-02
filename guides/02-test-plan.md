@@ -120,7 +120,7 @@ The first theory (a Playwright locator matching the wrong field in the DOM) turn
 
 **Confirmed a second time, after the fix landed — and from an unexpected direction.** `FUSE X1` was found corrupted again later, in a CI run using the *already-fixed* code (`TC-014` targeting `FUSE X2`, concurrency guard in place). The cause wasn't a new race in current code: two old, pre-fix commits had been manually rerun (to get a clean checkmark on old history) and then cancelled. Cancellation isn't instant — if `TC-014`'s old code was mid-edit against `FUSE X1` at that exact moment, the save can complete server-side just before the process actually stops, and a cancelled run reports neither pass nor fail, so nothing surfaced the corruption until the next unrelated run inherited it. Lesson on top of the lesson: rerunning old, pre-fix commits against a live shared org carries the same risk as the original bug, even when the rerun is immediately cancelled — restoring the record and moving on is the only real fix once it's happened, there's no way to make an old commit's rerun safe after the fact.
 
-### Planned Follow-Up: Per-Test Data Creation (🚧 Not Yet Implemented)
+### Per-Test Data Creation (✅ Implemented on `experiment/per-test-data-isolation`, not yet merged to `main`)
 
 `FUSE X2` contains the blast radius of the original bug, but it isn't a complete fix, and it has its own live side effect: **confirmed against the live org**, `FUSE X2`'s `Description__c` currently reads `"Internal Suite edit check 1785675423326"` — test-generated text, sitting on a real product in the public guest catalog, visible to anyone browsing the actual storefront right now. Solving that properly means not touching a real catalog product at all. The reasoning below is preserved close to how it actually happened, because the back-and-forth is the useful part, not just the ending.
 
@@ -131,11 +131,27 @@ The first theory (a Playwright locator matching the wrong field in the DOM) turn
 5. **The actual gap in that argument, backed by this project's own history, not a hypothetical:** `afterEach`-style cleanup is not reliable specifically when a process is killed from *outside* Playwright's own control — which is exactly what caused the second `FUSE X1` corruption documented above (a cancelled CI run). That failure mode has already happened, more than once, in this exact repo. And when cleanup does fail, a randomly-named orphan (`Test Product 1785675423326-a8f3d`) is *less* recognizable as a mistake than a corrupted-but-familiar `FUSE X1` — nothing about the name signals "this shouldn't be here."
 
 **Landing point — three distinct problems, three distinct, independently-scoped fixes, not one fix wearing three hats:**
-- **Collision** (two executions racing on the same record) → per-test fresh creation, unique per run.
-- **Orphan-identifiability** (when cleanup fails, not if) → an unmistakable naming convention, `ZZZ-TEST-<timestamp>-<random>`, so an orphan is trivially sweepable later by name alone, independent of whether `afterEach` actually ran.
-- **Indexing lag** (the test's own ability to find the record it just created) → the same `expect.poll()`-style retry already used for Case lookups in `REQ-CASE-001`, applied here too rather than assumed away.
+- **Collision** (two executions racing on the same record) → per-test fresh creation, unique per run. `pages/productFixture.ts`'s `createTestProduct()`/`deleteTestProduct()`, mirroring the exact REST pattern `TC-016`–`018` already use.
+- **Orphan-identifiability** (when cleanup fails, not if) → an unmistakable naming convention, `ZZZ-TEST-<timestamp>-<random>`, so an orphan is trivially sweepable later by name alone, independent of whether cleanup actually ran. Applied unconditionally, not just when a caller thinks they need it.
+- **Discoverability** (the test's own ability to find the record it just created) — turned out to have a better fix than the `expect.poll()` retry originally proposed here: since the test already has the new record's Id from creating it via REST, `ProductRecordPage.gotoById()` navigates straight to `/lightning/r/Product__c/{id}/view` instead of searching a list view by name. No polling needed, because there's nothing to wait on — this sidesteps the risk entirely rather than retrying through it. (The retry-based approach remains the right one for a test that *doesn't* already have an Id in hand, like `REQ-CASE-001`'s Case-by-Number lookup.)
 
-Not yet implemented — this is the design, arrived at by finding the first idea (a single fixture) incomplete and the second idea (pure per-test creation) also incomplete on its own, before converging on using both together for what each is actually good at.
+**Confirmed empirically before writing any implementation code, not assumed:** `sf sobject describe --sobject Product__c` — the only non-nillable creatable field is `OwnerId`, defaulted automatically; no validation rules exist on the object. Practically, only `Name` needs to be set. Separately, reading `ProductController.getProducts` in `ebikes-lwc`'s Apex source confirmed it's `@AuraEnabled(Cacheable=true scope='global')` — the method backing the Guest catalog, Order Builder, and Product Explorer's product lists. That's the concrete, source-backed reason `TC-012`/`TC-013` (which only *read* `FUSE X1`) were deliberately left unchanged rather than converted too: doing so would trade a solved problem (collision) for a real, confirmed-possible new one (cache-lag flakiness), for no safety benefit, since reads were already safe to share.
+
+**The full audit — every remaining shared-record reference in the suite, decided upfront (principle 3), not left implicit:**
+
+| Test | What it does with `FUSE X1`/`FUSE X2`/`Trailblazers` | Verdict |
+|---|---|---|
+| `TC-002` | Reads `FUSE X1`'s Name/MSRP in the guest catalog | Read-only shared — safe |
+| `TC-012` | Reads `FUSE X1` via Product Explorer | Read-only shared — safe |
+| `TC-013` | Reads `FUSE X1` to drag into a *new*, self-owned `Order__c`/`Order_Item__c` | Read-only shared — safe (the mutation is on its own new records, not `FUSE X1`) |
+| `TC-015` | Reads `FUSE X1`'s MSRP via REST | Read-only shared — safe |
+| `TC-025`/`TC-026` | Accessibility scans of pages showing `FUSE X1`/Order Builder | Read-only shared — safe |
+| `TC-027` | Accessibility scan of `FUSE X1`'s record page | Read-only shared — safe |
+| `TC-014` | **Edits** a Product's Description | The only writer — converted to per-test creation, above |
+
+Only one row needed to change. This is what "test isolation as a default assumption" (principle 1) looks like applied honestly to a suite that mostly already had it — not a rewrite, an audit that found one real gap and closed it.
+
+**Verified against the live org, not just locally reasoned about:** `--repeat-each=3` on `TC-014` produced 3 consecutive passes with zero `ZZZ-TEST-*` orphans left behind afterward (`sf data query`) — cleanup confirmed working end-to-end, not just in the happy-path single run.
 
 ---
 
