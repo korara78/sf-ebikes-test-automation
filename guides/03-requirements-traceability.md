@@ -2,7 +2,7 @@
 
 **Project:** Salesforce LWC Test Automation Portfolio (E-Bikes)
 <!-- LTM:SUMMARY:START -->
-**Status:** 7/8 Guest Suite + 4/4 Internal Suite + 5/5 API Suite + 3/3 Penetration Suite + 1/6 Accessibility Suite requirements confirmed — matrix auto-generated 8/1/2026, 5:59 PM from the latest test run
+**Status:** 7/8 Guest Suite + 4/4 Internal Suite + 5/5 API Suite + 3/3 Penetration Suite + 1/6 Accessibility Suite requirements confirmed — matrix auto-generated 8/1/2026, 6:12 PM from the latest test run
 <!-- LTM:SUMMARY:END -->
 
 ---
@@ -96,14 +96,14 @@ Not generic endpoint smoke tests — each requirement targets a specific authori
 `@axe-core/playwright` scans against representative Guest and Internal pages. Every violation found carries a **Scope/Owner**: App (this project's own `ebikes-lwc` markup, fixable here) or Platform (Salesforce's own global Lightning chrome — e.g. the favorites star — not fixable from this app's code at all). Surfacing that distinction as its own column, rather than leaving it in a code comment, is deliberate: it's not enough to find a violation, a reviewer should be able to tell at a glance who owns fixing each one.
 
 <!-- LTM:A11Y:START -->
-| ID | Test&nbsp;ID | Requirement | Status | Scope/Owner | Expected&nbsp;Behavior |
+| ID | Test&nbsp;ID | Requirement | Status | Expected&nbsp;Behavior | Scope/Owner |
 |---|---|---|---|---|---|
-| REQ-A11Y-001 | TC-023 | Guest catalog page has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | App (ebikes-lwc) | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>The paginator's next/previous icon button has no discernible text — a screen reader user has no way to know what it does. Confirmed by axe-core (`button-name`, WCAG 2.1 A, critical), and independently by this suite's own `ProductCatalogPage` locator comment, which already had to work around the same missing accessible name. |
-| REQ-A11Y-002 | TC-024 | Guest Create Case form has no WCAG 2.1/2.2 Level A/AA violations | ✅ Confirmed | — | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>Clean — zero violations found. |
-| REQ-A11Y-003 | TC-025 | Internal Product Explorer has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | App (ebikes-lwc) + Platform (Salesforce) | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>Two distinct app-level gaps: the same paginator icon button as the Guest catalog, plus a separate action icon button on the product detail card, both with no discernible text (`button-name`, WCAG 2.1 A, critical). Also one platform-level gap: the global favorites-star button in Salesforce's own Lightning chrome is under the WCAG 2.2 minimum touch target size (`target-size`, WCAG 2.2 AA, serious) — not something this app's code can fix, since it isn't this app's markup. |
-| REQ-A11Y-004 | TC-026 | Internal Order Builder has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | App (ebikes-lwc) | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>Same paginator icon button gap as the Guest catalog and Product Explorer (`button-name`, WCAG 2.1 A, critical) — one root-cause component, three pages affected. |
-| REQ-A11Y-005 | TC-027 | Internal Product record view has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | Platform (Salesforce) | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>Only the global favorites-star touch-target gap (`target-size`, WCAG 2.2 AA, serious) — Salesforce's own Lightning chrome, not this app's markup. |
-| REQ-A11Y-006 | TC-028 | Internal Case list has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | Platform (Salesforce) | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>Only the global favorites-star touch-target gap (`target-size`, WCAG 2.2 AA, serious) — Salesforce's own Lightning chrome, not this app's markup. |
+| REQ-A11Y-001 | TC-023 | Guest catalog page has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>The paginator's next/previous icon button has no discernible text — a screen reader user has no way to know what it does. Confirmed by axe-core (`button-name`, WCAG 2.1 A, critical), and independently by this suite's own `ProductCatalogPage` locator comment, which already had to work around the same missing accessible name. | App (ebikes-lwc) |
+| REQ-A11Y-002 | TC-024 | Guest Create Case form has no WCAG 2.1/2.2 Level A/AA violations | ✅ Confirmed | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>Clean — zero violations found. | — |
+| REQ-A11Y-003 | TC-025 | Internal Product Explorer has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>Two distinct app-level gaps: the same paginator icon button as the Guest catalog, plus a separate action icon button on the product detail card, both with no discernible text (`button-name`, WCAG 2.1 A, critical). Also one platform-level gap: the global favorites-star button in Salesforce's own Lightning chrome is under the WCAG 2.2 minimum touch target size (`target-size`, WCAG 2.2 AA, serious) — not something this app's code can fix, since it isn't this app's markup. | App (ebikes-lwc) + Platform (Salesforce) |
+| REQ-A11Y-004 | TC-026 | Internal Order Builder has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>Same paginator icon button gap as the Guest catalog and Product Explorer (`button-name`, WCAG 2.1 A, critical) — one root-cause component, three pages affected. | App (ebikes-lwc) |
+| REQ-A11Y-005 | TC-027 | Internal Product record view has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>Only the global favorites-star touch-target gap (`target-size`, WCAG 2.2 AA, serious) — Salesforce's own Lightning chrome, not this app's markup. | Platform (Salesforce) |
+| REQ-A11Y-006 | TC-028 | Internal Case list has no WCAG 2.1/2.2 Level A/AA violations | ❌ Known Gap | _Last run: 8/1/2026, 5:56 PM — 1 browser._<br>Only the global favorites-star touch-target gap (`target-size`, WCAG 2.2 AA, serious) — Salesforce's own Lightning chrome, not this app's markup. | Platform (Salesforce) |
 <!-- LTM:A11Y:END -->
 
 ---

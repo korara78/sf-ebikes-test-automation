@@ -137,8 +137,13 @@ function escapeCell(text) {
 }
 
 function renderTable(rows, tagIndex, { includeNotesColumn = true, includeScopeColumn = false } = {}) {
+  // The first 5 columns (ID, Test ID, Requirement, Status, Expected Behavior)
+  // stay in the same position across every table, guest through
+  // accessibility — Scope/Owner is appended as a trailing 6th column only
+  // where a suite needs it, rather than inserted in the middle, so a
+  // column shared by all tables never shifts position between them.
   const header = includeScopeColumn
-    ? '| ID | Test&nbsp;ID | Requirement | Status | Scope/Owner | Expected&nbsp;Behavior |\n|---|---|---|---|---|---|'
+    ? '| ID | Test&nbsp;ID | Requirement | Status | Expected&nbsp;Behavior | Scope/Owner |\n|---|---|---|---|---|---|'
     : includeNotesColumn
     ? '| ID | Test&nbsp;ID | Requirement | Status | Expected&nbsp;Behavior |\n|---|---|---|---|---|'
     : '| ID | Test&nbsp;ID | Requirement | Status |\n|---|---|---|---|';
@@ -147,8 +152,8 @@ function renderTable(rows, tagIndex, { includeNotesColumn = true, includeScopeCo
     const { badge, liveInfo } = deriveRowStatus(row.testIds, tagIndex);
     const testIdCell = row.testIds.length > 0 ? row.testIds.join(', ') : '—';
     const notesCell = liveInfo ? `${liveInfo}<br>${row.notes}` : row.notes;
-    const scopeCell = includeScopeColumn ? ` ${escapeCell(row.scope)} |` : '';
-    return `| ${row.reqId} | ${testIdCell} | ${escapeCell(row.requirement)} | ${badge} |${scopeCell} ${escapeCell(notesCell)} |`;
+    const scopeCell = includeScopeColumn ? ` | ${escapeCell(row.scope)}` : '';
+    return `| ${row.reqId} | ${testIdCell} | ${escapeCell(row.requirement)} | ${badge} | ${escapeCell(notesCell)}${scopeCell} |`;
   });
 
   return [header, ...lines].join('\n');
