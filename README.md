@@ -22,6 +22,7 @@ Tests are written in **TypeScript** using **Playwright Test**, Playwright's buil
 5. [Visual Reporting & Trace Debugging](guides/05-visual-reporting-and-debugging.md)
 6. [API & Authorization Boundary Testing](guides/06-api-and-authorization-boundary-testing.md)
 7. [Accessibility Testing](guides/07-accessibility-testing.md)
+8. [Git Workflow (GitHub Flow)](guides/08-git-workflow.md)
 
 ## About This Project
 
