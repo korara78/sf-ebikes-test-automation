@@ -1,16 +1,11 @@
 name: Playwright Tests
 on:
-  push:
-    branches: [ main, master ]
-    # Pure prose — never imported by any test or by scripts/generate-
-    # traceability-matrix.mjs, so a commit touching only these can't change
-    # what `npx playwright test` verifies. Deliberately narrow: doesn't
-    # include guides/traceability-map.mjs, which is still .mjs code even
-    # though it happens not to be exercised by this workflow today.
-    paths-ignore:
-      - 'guides/**/*.md'
-      - 'CLAUDE.md'
-      - 'README.md'
+  # No `push` trigger: branch protection on main/master requires a PR (see
+  # Guide 8), so the only thing that could ever push directly to them is a
+  # merge — already verified by its own PR run below. A push trigger here
+  # would also double-fire alongside pull_request's `synchronize` event on
+  # every commit to an open PR branch, doubling load on the live org this
+  # suite runs against for zero extra safety.
   pull_request:
     branches: [ main, master ]
 # Only one run against the live org at a time. A manual rerun (or a second
