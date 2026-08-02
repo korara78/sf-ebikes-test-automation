@@ -189,9 +189,9 @@ export const a11ySuite = [
     reqId: 'REQ-A11Y-001',
     testIds: ['TC-023'],
     requirement: 'Guest catalog page has no WCAG 2.1/2.2 Level A/AA violations',
-    scope: 'App (ebikes-lwc)',
+    scope: '—',
     notes:
-      "The paginator's next/previous icon button has no discernible text — a screen reader user has no way to know what it does. Confirmed by axe-core (`button-name`, WCAG 2.1 A, critical), and independently by this suite's own `ProductCatalogPage` locator comment, which already had to work around the same missing accessible name."
+      "Fixed. The paginator's next/previous icon button had no discernible text (axe-core `button-name`, WCAG 2.1 A, critical) — it was using a slotted `<label>` child, which `lightning-button-icon` doesn't recognize as an accessible name at all. Fixed by adding `alternative-text` in ebikes-lwc's `paginator.html`, redeployed, and confirmed clean against the live org."
   },
   {
     reqId: 'REQ-A11Y-002',
@@ -204,17 +204,17 @@ export const a11ySuite = [
     reqId: 'REQ-A11Y-003',
     testIds: ['TC-025'],
     requirement: 'Internal Product Explorer has no WCAG 2.1/2.2 Level A/AA violations',
-    scope: 'App (ebikes-lwc) + Platform (Salesforce)',
+    scope: 'Platform (Salesforce)',
     notes:
-      "Two distinct app-level gaps: the same paginator icon button as the Guest catalog, plus a separate action icon button on the product detail card, both with no discernible text (`button-name`, WCAG 2.1 A, critical). Also one platform-level gap: the global favorites-star button in Salesforce's own Lightning chrome is under the WCAG 2.2 minimum touch target size (`target-size`, WCAG 2.2 AA, serious) — not something this app's code can fix, since it isn't this app's markup."
+      "Two app-level gaps here originally — the same paginator icon button as the Guest catalog, plus a separate action icon button on the product detail card, both missing `alternative-text` (`button-name`, WCAG 2.1 A, critical) — are now fixed in ebikes-lwc and confirmed clean. One platform-level gap remains: the global favorites-star button in Salesforce's own Lightning chrome is under the WCAG 2.2 minimum touch target size (`target-size`, WCAG 2.2 AA, serious) — not something this app's code can fix, since it isn't this app's markup."
   },
   {
     reqId: 'REQ-A11Y-004',
     testIds: ['TC-026'],
     requirement: 'Internal Order Builder has no WCAG 2.1/2.2 Level A/AA violations',
-    scope: 'App (ebikes-lwc)',
+    scope: '—',
     notes:
-      "Same paginator icon button gap as the Guest catalog and Product Explorer (`button-name`, WCAG 2.1 A, critical) — one root-cause component, three pages affected."
+      "Fixed. Same paginator icon button gap as the Guest catalog and Product Explorer (`button-name`, WCAG 2.1 A, critical, one root-cause component, three pages affected) — fixed by adding `alternative-text` in ebikes-lwc's `paginator.html`, redeployed, and confirmed clean against the live org."
   },
   {
     reqId: 'REQ-A11Y-005',

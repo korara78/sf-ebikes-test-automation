@@ -1,7 +1,7 @@
 # Guide 7: Accessibility Testing
 
 **Project:** Salesforce LWC Test Automation Portfolio (E-Bikes)
-**Status:** ✅ Built and verified against the live org — all 6 tests (Accessibility Suite) confirmed passing, with three real, documented WCAG violations surfaced by the first live scans (see below).
+**Status:** ✅ Built and verified against the live org — all 6 tests (Accessibility Suite) confirmed passing. Three real WCAG violations were surfaced by the first live scans; the two app-level ones are now fixed in `ebikes-lwc` and confirmed clean, one platform-level one remains a documented, un-fixable-from-this-app Known Gap (see below).
 
 ---
 
@@ -41,14 +41,16 @@ A single `chromium` project is enough — like the API and Penetration Suites, a
 
 Every violation found carries a **Scope/Owner**, surfaced as its own column in Guide 3's traceability table rather than left buried in a code comment — the point isn't just finding violations, it's being able to tell a reviewer at a glance who's actually responsible for fixing each one.
 
-**App-level (owner: `ebikes-lwc`, fixable in this app's own source) — `button-name`, WCAG 2.1 A, critical:**
-- The `c-paginator` component's next/previous icon button has no discernible text. One root cause, three pages affected (Guest catalog, Internal Product Explorer, Internal Order Builder all share this component) — the blast radius of a single shared-component defect.
+**App-level (owner: `ebikes-lwc`, fixable in this app's own source) — `button-name`, WCAG 2.1 A, critical — now fixed:**
+- The `c-paginator` component's next/previous icon button had no discernible text. One root cause, three pages affected (Guest catalog, Internal Product Explorer, Internal Order Builder all share this component) — the blast radius of a single shared-component defect.
 - A second, distinct instance on Product Explorer only: `c-product-card`'s action icon button (`lightning-button-icon[slot="actions"]`), also with no accessible name.
 
-Notably, the paginator gap wasn't a new discovery in the axe-core sense — `pages/ProductCatalogPage.ts`'s own comment on `previousButton`/`nextButton` already documented that these buttons have no accessible name, as a *locator-strategy* workaround (`getByRole` with a name never matches them). Running an actual accessibility scan turned what had been filed as a testing inconvenience into a formally confirmed WCAG violation.
+Notably, the paginator gap wasn't a new discovery in the axe-core sense — `pages/ProductCatalogPage.ts`'s own comment on `previousButton`/`nextButton` already documented that these buttons have no accessible name, as a *locator-strategy* workaround (`getByRole` with a name never matches them). Running an actual accessibility scan turned what had been filed as a testing inconvenience into a formally confirmed WCAG violation — and its root cause, once investigated, turned out to be simple: both components rendered `<label>Previous</label>`/`<label>Next</label>`/`<label>Open Record</label>` as slotted child content, but `lightning-button-icon` doesn't recognize a slotted `<label>` as its accessible name at all — the correct API is the `alternative-text` attribute. Fixed in `ebikes-lwc/force-app/main/default/lwc/paginator/paginator.html` and `.../lwc/productCard/productCard.html`, redeployed via `sf project deploy start`, and confirmed clean against the live org (`TC-023`/`TC-026` no longer wrapped in `test.fail()`; `TC-025` narrowed to just its remaining platform-level gap).
+
+`pages/ProductCatalogPage.ts`'s `previousButton`/`nextButton` were updated at the same time, from position-based (`.first()`/`.last()`) to `getByRole('button', { name: 'Previous' | 'Next' })` — now reliable, since a real accessible name exists to match against.
 
 **Platform-level (owner: Salesforce, not fixable from this app's code) — `target-size`, WCAG 2.2 AA, serious:**
-- The global `.branding-favorites-star-button` — Salesforce's own "favorite this page" star, part of standard Lightning chrome — is under the WCAG 2.2 minimum touch target size. Appears on every internal page scanned (Product Explorer, Product record, Case list), since it's global UI rendered by the platform itself, not anything this app built or controls.
+- The global `.branding-favorites-star-button` — Salesforce's own "favorite this page" star, part of standard Lightning chrome — is under the WCAG 2.2 minimum touch target size. Appears on every internal page scanned (Product Explorer, Product record, Case list), since it's global UI rendered by the platform itself, not anything this app built or controls. Still an open Known Gap — no `ebikes-lwc` fix is possible for this one.
 
 **Clean:** the Guest Create Case form has zero violations — a real, differentiated result confirming the scan discriminates between pages rather than passing or failing uniformly.
 
@@ -59,6 +61,8 @@ Notably, the paginator gap wasn't a new discovery in the axe-core sense — `pag
 Every page with a known violation uses the same `test.fail()` convention Guide 3 established for `REQ-CASE-003`: the assertion (`expect(violations).toEqual([])`) genuinely fails today, `test.fail()` declares that as the expected outcome, and if a fix ever lands (in `ebikes-lwc` for an app-level finding, or a Salesforce platform update for a chrome-level one), the row flips to 🔴 Regression in Guide 3's matrix — the live signal to revisit it, not a change that gets silently absorbed.
 
 Each `test.fail()` call carries its own specific reason string naming the exact axe rule, WCAG version/level, severity, and Scope/Owner — not a generic "known gap" — so the reason text itself is enough to understand the finding without cross-referencing this guide or the traceability map.
+
+This is exactly what happened in practice: after fixing the two app-level components and redeploying, re-running `TC-023`/`TC-025`/`TC-026` locally surfaced `Expected to fail, but passed` on the two now-clean pages — caught before committing, not as a silent pass. `test.fail()` was removed from those two, `TC-025`'s reason string was trimmed to only its remaining platform-level gap, and the traceability map's `notes`/`scope` fields were updated to match, all in the same change as the component fix — so the matrix's committed history goes straight from Known Gap to Confirmed, with no intermediate Regression state ever live.
 
 ---
 

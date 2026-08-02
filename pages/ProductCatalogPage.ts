@@ -19,13 +19,14 @@ export class ProductCatalogPage {
 
   /**
    * "Previous" / "Next" buttons rendered by the paginator component.
-   * Confirmed against the live org: these are icon-only buttons with no
-   * accessible name (getByRole with a name never matches), so they're
-   * targeted by position — they're the only buttons rendered as siblings
-   * of `.nav-info` inside the paginator container. On page 1 only the
-   * Next button renders, so previousButton/nextButton both resolve to it
-   * there; that's fine since goToPreviousPage() is never called from
-   * page 1 in current tests.
+   * Originally targeted by position, since these icon-only buttons had no
+   * accessible name at all (a real WCAG violation — see REQ-A11Y-001/004
+   * in guides/traceability-map.mjs). Fixed in ebikes-lwc's paginator.html
+   * (added `alternative-text`), so `getByRole` with a name now works
+   * directly — on page 1, where the Previous button doesn't render at all
+   * (`lwc:if={isNotFirstPage}`), `previousButton` simply resolves to zero
+   * elements rather than falling back to Next; that's fine since
+   * goToPreviousPage() is never called from page 1 in current tests.
    */
   readonly previousButton: Locator;
   readonly nextButton: Locator;
@@ -41,8 +42,8 @@ export class ProductCatalogPage {
     this.searchInput = page.getByLabel('Search Key');
     this.paginatorInfo = page.locator('.nav-info');
     const paginationControls = this.paginatorInfo.locator('..');
-    this.previousButton = paginationControls.getByRole('button').first();
-    this.nextButton = paginationControls.getByRole('button').last();
+    this.previousButton = paginationControls.getByRole('button', { name: 'Previous' });
+    this.nextButton = paginationControls.getByRole('button', { name: 'Next' });
   }
 
   async goto(path = 'product-explorer') {
