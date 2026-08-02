@@ -4,6 +4,14 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+# Only one run against the live org at a time. A manual rerun (or a second
+# push) while a run is still in progress queues behind it instead of
+# executing concurrently — confirmed to matter: two full 59-test runs
+# hitting this personal Dev Edition org simultaneously produced measurably
+# broader, slower failures than either running alone.
+concurrency:
+  group: playwright-tests
+  cancel-in-progress: false
 jobs:
   test:
     timeout-minutes: 60
