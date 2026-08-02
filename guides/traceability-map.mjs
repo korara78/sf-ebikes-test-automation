@@ -95,7 +95,7 @@ export const internalSuite = [
     testIds: ['TC-014'],
     requirement: 'An internal user can view/edit a Product record',
     notes:
-      "Both the top-right \"Edit\" button and every field's pencil icon open the same full-record edit modal — there's no separate lightweight per-field editor despite what the icons suggest."
+      "Both the top-right \"Edit\" button and every field's pencil icon open the same full-record edit modal — there's no separate lightweight per-field editor despite what the icons suggest. Creates its own Product__c via REST, edits it, then deletes it — not a shared catalog product. See Guide 2's \"Test Data Isolation\" section for why: a shared record this test mutated was twice found corrupted by a second, overlapping execution of itself racing on the same record."
   }
 ];
 
