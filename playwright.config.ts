@@ -124,6 +124,21 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
+    /* Accessibility Suite — axe-core scans (WCAG 2.1/2.2 A/AA) against both
+     * Guest and Internal pages from a single spec file. One engine only:
+     * axe-core evaluates the rendered DOM/ARIA tree, not rendering-engine
+     * quirks, so multiplying across browsers wouldn't add coverage. Needs
+     * the `setup` dependency + storageState for its Internal-page tests,
+     * same as the `-internal` projects above; its Guest-page tests simply
+     * don't visit any internal-app URL, so the shared storageState is
+     * harmless for those. */
+    {
+      name: 'accessibility',
+      testMatch: /accessibility\.spec\.ts/,
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/user.json' },
+    },
+
     /* Test against mobile viewports. */
     // {
     //   name: 'Mobile Chrome',

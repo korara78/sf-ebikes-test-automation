@@ -20,6 +20,8 @@ Tests are written in **TypeScript** using **Playwright Test**, Playwright's buil
 3. [Requirements Traceability](guides/03-requirements-traceability.md)
 4. [Authentication & Test Session Strategy](guides/04-authentication-test-session-strategy.md)
 5. [Visual Reporting & Trace Debugging](guides/05-visual-reporting-and-debugging.md)
+6. [API & Authorization Boundary Testing](guides/06-api-and-authorization-boundary-testing.md)
+7. [Accessibility Testing](guides/07-accessibility-testing.md)
 
 ## About This Project
 

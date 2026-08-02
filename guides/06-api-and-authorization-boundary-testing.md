@@ -129,4 +129,4 @@ Two things surfaced only by actually running this against the org, neither predi
 
 ## What This Unblocked
 
-Nothing downstream — this is currently the last guide. All four suites (Guest, Internal, API, Penetration) are now built, wired into CI, and confirmed passing against the live org; Guide 3's traceability tables reflect the current confirmed state.
+[Guide 7: Accessibility Testing](07-accessibility-testing.md) — a fifth suite, following the same "run it against the live org first, see what's actually there" posture established here for the Penetration Suite.

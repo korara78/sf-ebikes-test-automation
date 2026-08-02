@@ -21,7 +21,7 @@
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { guestSuite, internalSuite, apiSuite, authzSuite } from '../guides/traceability-map.mjs';
+import { guestSuite, internalSuite, apiSuite, authzSuite, a11ySuite } from '../guides/traceability-map.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -136,8 +136,10 @@ function escapeCell(text) {
   return text.replace(/\n/g, ' ');
 }
 
-function renderTable(rows, tagIndex, { includeNotesColumn = true } = {}) {
-  const header = includeNotesColumn
+function renderTable(rows, tagIndex, { includeNotesColumn = true, includeScopeColumn = false } = {}) {
+  const header = includeScopeColumn
+    ? '| ID | Test&nbsp;ID | Requirement | Status | Scope/Owner | Expected&nbsp;Behavior |\n|---|---|---|---|---|---|'
+    : includeNotesColumn
     ? '| ID | Test&nbsp;ID | Requirement | Status | Expected&nbsp;Behavior |\n|---|---|---|---|---|'
     : '| ID | Test&nbsp;ID | Requirement | Status |\n|---|---|---|---|';
 
@@ -145,7 +147,8 @@ function renderTable(rows, tagIndex, { includeNotesColumn = true } = {}) {
     const { badge, liveInfo } = deriveRowStatus(row.testIds, tagIndex);
     const testIdCell = row.testIds.length > 0 ? row.testIds.join(', ') : '—';
     const notesCell = liveInfo ? `${liveInfo}<br>${row.notes}` : row.notes;
-    return `| ${row.reqId} | ${testIdCell} | ${escapeCell(row.requirement)} | ${badge} | ${escapeCell(notesCell)} |`;
+    const scopeCell = includeScopeColumn ? ` ${escapeCell(row.scope)} |` : '';
+    return `| ${row.reqId} | ${testIdCell} | ${escapeCell(row.requirement)} | ${badge} |${scopeCell} ${escapeCell(notesCell)} |`;
   });
 
   return [header, ...lines].join('\n');
@@ -178,7 +181,7 @@ function validate(allRows) {
 function main() {
   const results = loadResults();
   const tagIndex = buildTagIndex(results);
-  const allRows = [...guestSuite, ...internalSuite, ...apiSuite, ...authzSuite];
+  const allRows = [...guestSuite, ...internalSuite, ...apiSuite, ...authzSuite, ...a11ySuite];
 
   const { orphanInCode, staleInMap } = validate(allRows);
 
@@ -218,6 +221,7 @@ function main() {
   const internalConfirmedCount = confirmedCount(internalSuite);
   const apiConfirmedCount = confirmedCount(apiSuite);
   const authzConfirmedCount = confirmedCount(authzSuite);
+  const a11yConfirmedCount = confirmedCount(a11ySuite);
   const regressionCount = allRows.filter(
     (r) => deriveRowStatus(r.testIds, tagIndex).badge === '🔴 Regression'
   ).length;
@@ -229,7 +233,7 @@ function main() {
     minute: '2-digit'
   });
 
-  const summary = `**Status:** ${guestConfirmedCount}/${guestSuite.length} Guest Suite + ${internalConfirmedCount}/${internalSuite.length} Internal Suite + ${apiConfirmedCount}/${apiSuite.length} API Suite + ${authzConfirmedCount}/${authzSuite.length} Penetration Suite requirements confirmed${
+  const summary = `**Status:** ${guestConfirmedCount}/${guestSuite.length} Guest Suite + ${internalConfirmedCount}/${internalSuite.length} Internal Suite + ${apiConfirmedCount}/${apiSuite.length} API Suite + ${authzConfirmedCount}/${authzSuite.length} Penetration Suite + ${a11yConfirmedCount}/${a11ySuite.length} Accessibility Suite requirements confirmed${
     regressionCount > 0 ? `, **${regressionCount} regression(s) detected**` : ''
   } — matrix auto-generated ${generatedAt} from the latest test run`;
 
@@ -244,6 +248,11 @@ function main() {
   );
   doc = replaceBetween(doc, 'LTM:API', renderTable(apiSuite, tagIndex));
   doc = replaceBetween(doc, 'LTM:AUTHZ', renderTable(authzSuite, tagIndex));
+  doc = replaceBetween(
+    doc,
+    'LTM:A11Y',
+    renderTable(a11ySuite, tagIndex, { includeScopeColumn: true })
+  );
 
   writeFileSync(docPath, doc);
   console.log(`✅ Matrix regenerated: ${docPath}`);
