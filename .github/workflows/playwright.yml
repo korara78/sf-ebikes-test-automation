@@ -2,6 +2,15 @@ name: Playwright Tests
 on:
   push:
     branches: [ main, master ]
+    # Pure prose — never imported by any test or by scripts/generate-
+    # traceability-matrix.mjs, so a commit touching only these can't change
+    # what `npx playwright test` verifies. Deliberately narrow: doesn't
+    # include guides/traceability-map.mjs, which is still .mjs code even
+    # though it happens not to be exercised by this workflow today.
+    paths-ignore:
+      - 'guides/**/*.md'
+      - 'CLAUDE.md'
+      - 'README.md'
   pull_request:
     branches: [ main, master ]
 # Only one run against the live org at a time. A manual rerun (or a second
