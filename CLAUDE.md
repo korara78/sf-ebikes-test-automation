@@ -46,6 +46,11 @@ npx playwright install --with-deps   # browser binaries; CI does this on every r
 - All suites except Penetration create real records in the live org; only the API Suite cleans up after itself (its own dedicated delete test) — every other created record (Cases, Orders/Order Items, a Product field edit) is left behind, accepted as normal accumulation for this portfolio org, not treated as a bug. The Accessibility Suite's Order Builder scan (`TC-026`) reuses `OrderBuilderPage.createOrder()` for this same reason — it creates a real `Order__c` as a side effect of reaching the page under test, not something the suite tries to avoid.
 - **API/Penetration suites (see [Guide 6](guides/06-api-and-authorization-boundary-testing.md)):** E-Bikes has no custom `@RestResource` Apex endpoint — its only server-side surface is three read-only `@AuraEnabled` methods, and every mutation goes through Salesforce's standard Lightning Data Service REST/UI API. The API Suite exercises that standard REST API directly (bearer token via `pages/apiSession.ts`); the Penetration Suite tests specific guest-profile authorization boundaries read from the org's guest profile metadata (in the sibling `ebikes-lwc` checkout) rather than generic endpoint checks.
 
+## Conventions
+
+- **Locators (see Guide 2's "Locator Strategy"):** semantic locators (`getByRole`/`getByLabel`/`getByText`) first, always. A CSS class/tag selector is a documented last resort only — acceptable when a Salesforce/LWC element genuinely has no accessible role or name, and only with a comment saying so explicitly. Applies to every new page object and locator, not just the ones that motivated the rule.
+- **Actionability (see Guide 2's "Actionability: No Bare Waits"):** never use a bare `page.waitForTimeout()` to paper over a timing/settling race. Playwright's built-in actionability checks already cover the target element itself; for a genuine settling condition they don't cover (e.g. a surrounding modal still animating), wait on that condition explicitly via `expect.poll()` or `pages/actionability.ts`'s `waitForStableLayout()`.
+
 ## Notes from the environment guide worth knowing when working here
 
 - The Salesforce org and E-Bikes deployment live outside this repo (a personal Developer Edition org) — this repo only contains the test automation, not the application source or org config.

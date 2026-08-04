@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { readInternalOrigin } from './internalSession';
+import { waitForStableLayout } from './actionability';
 
 /**
  * Page object for creating a Reseller Order (Order__c) and adding line
@@ -43,12 +44,17 @@ export class OrderBuilderPage {
     const origin = readInternalOrigin();
     await this.page.goto(`${origin}/lightning/o/Order__c/list?filterName=__Recent`);
     await this.page.getByRole('button', { name: 'New' }).click();
-    // Confirmed against the live org: interacting with the modal before its
-    // layout has fully settled can cause the account typeahead's dropdown
-    // option to intercept-then-vanish (reproduced on Firefox) — give the
-    // modal a beat to finish rendering first.
+    // Interacting with the modal before its layout has fully settled can
+    // cause the account typeahead's dropdown option to intercept-then-vanish
+    // (reproduced on Firefox against the live org, see Guide 2's
+    // "Actionability: No Bare Waits"). Waiting for the modal's own bounding
+    // box to stop changing is a real settle signal, unlike a fixed delay.
+    // Confirmed against the live org: TC-013 passed 5/5 on
+    // --project=firefox-internal --repeat-each=5, no flake.
+    const modal = this.page.getByRole('dialog');
+    await modal.waitFor({ state: 'visible' });
+    await waitForStableLayout(modal);
     await this.page.getByRole('combobox', { name: /Account/i }).waitFor({ state: 'visible' });
-    await this.page.waitForTimeout(500);
   }
 
   async fillAccount(name: string) {
