@@ -11,6 +11,7 @@ Tests are written in **TypeScript** using **Playwright Test**, Playwright's buil
 ## Contents
 
 - `/guides` — step-by-step documentation of environment setup, Salesforce org configuration, application deployment, and test automation strategy
+- `/audits` — periodic checks of the suite against a standard set of criteria (scaling, security, ...), independent of the step-by-step guides above
 - `/tests` — Playwright test suite
 
 ## Guides
@@ -23,6 +24,10 @@ Tests are written in **TypeScript** using **Playwright Test**, Playwright's buil
 6. [API & Authorization Boundary Testing](guides/06-api-and-authorization-boundary-testing.md)
 7. [Accessibility Testing](guides/07-accessibility-testing.md)
 8. [Git Workflow (GitHub Flow)](guides/08-git-workflow.md)
+
+## Audits
+
+- [Scale Check Audit](audits/scale-check-audit.md)
 
 ## About This Project
 
