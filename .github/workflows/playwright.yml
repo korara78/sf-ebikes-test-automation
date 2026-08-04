@@ -25,10 +25,32 @@ jobs:
     - uses: actions/setup-node@v7
       with:
         node-version: lts/*
+        cache: npm
     - name: Install dependencies
       run: npm ci
+    # Browser binaries (~/.cache/ms-playwright) are a few hundred MB per
+    # browser and otherwise re-downloaded from scratch on every single PR
+    # run — independent of how many tests exist, unlike the other scaling
+    # levers in this repo. Keyed on package-lock.json's hash so a Playwright
+    # version bump (which changes the lockfile) naturally invalidates the
+    # cache instead of silently reusing stale binaries.
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+    # `--with-deps` also apt-installs OS-level libraries Playwright's
+    # browsers need — those aren't part of the cached directory above and
+    # don't persist on GitHub's ephemeral runners regardless, so a cache
+    # hit still needs `install-deps` on its own; it just skips the large
+    # browser-binary download that step would otherwise also trigger.
     - name: Install Playwright Browsers
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
       run: npx playwright install --with-deps
+    - name: Install Playwright OS dependencies (cache hit)
+      if: steps.playwright-cache.outputs.cache-hit == 'true'
+      run: npx playwright install-deps
     - name: Install Salesforce CLI
       run: npm install --global @salesforce/cli
     - name: Authenticate to Salesforce via JWT Bearer Flow
