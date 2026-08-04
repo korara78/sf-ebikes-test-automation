@@ -89,7 +89,7 @@ A few locators in this repo predate this rule being written down (`.nav-info`, `
 
 **Countermeasure:** when there's a genuine settling condition Playwright's built-in actionability checks don't cover, wait on that condition explicitly instead of guessing a duration — `expect.poll()` (already used elsewhere in this file for WebKit's `waitForURL` gap on save) or a small purpose-built helper, never a bare timeout. `pages/actionability.ts`'s `waitForStableLayout()` polls a locator's own bounding box until two reads in a row match, and `OrderBuilderPage.gotoNew()` now calls it on the modal itself before touching the combobox — trading a guessed delay for an actual "has this stopped moving" check that fails loudly via `expect.poll`'s own timeout instead of silently running long or returning too early.
 
-**Not yet re-verified against the live org after this rewrite:** the original fixed delay was tuned against a Firefox-specific race confirmed once, empirically. This replacement hasn't had the same live-org confirmation pass yet — re-run the Order Builder test (`TC-013`) against the live org, on Firefox specifically, before trusting this in CI.
+**Confirmed against the live org:** the original fixed delay was tuned against a Firefox-specific race confirmed once, empirically. This replacement has now had the same treatment — `TC-013` passed 5/5 on `--project=firefox-internal --repeat-each=5` against the live org, no flake.
 
 ### Shadow DOM Workaround: Accessing the Real Draggable Node
 

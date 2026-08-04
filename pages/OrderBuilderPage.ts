@@ -48,9 +48,9 @@ export class OrderBuilderPage {
     // cause the account typeahead's dropdown option to intercept-then-vanish
     // (reproduced on Firefox against the live org, see Guide 2's
     // "Actionability: No Bare Waits"). Waiting for the modal's own bounding
-    // box to stop changing is a real settle signal, unlike a fixed delay —
-    // NOT yet re-confirmed against the live org after this rewrite; re-run
-    // TC-013 on Firefox before relying on this in CI.
+    // box to stop changing is a real settle signal, unlike a fixed delay.
+    // Confirmed against the live org: TC-013 passed 5/5 on
+    // --project=firefox-internal --repeat-each=5, no flake.
     const modal = this.page.getByRole('dialog');
     await modal.waitFor({ state: 'visible' });
     await waitForStableLayout(modal);
