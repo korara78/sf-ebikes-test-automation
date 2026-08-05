@@ -1,0 +1,28 @@
+name: OSV Vulnerability Scan
+
+# Deliberately NOT triggered on push/pull_request — dependency vulnerability
+# disclosure is time-based, not code-change-based. A dependency that's clean
+# today can have a CVE disclosed against it next week with zero commits here.
+# See audits/security-check-audit.md for the full reasoning.
+on:
+  workflow_dispatch: {}   # manual: Actions tab -> OSV Vulnerability Scan -> Run workflow
+  schedule:
+    - cron: '0 6 * * 1'   # Monday 06:00 UTC = Sunday 11:00 PM Arizona time (UTC-7, no DST)
+
+permissions:
+  contents: read
+  security-events: write   # required to upload SARIF results to the Security tab
+
+jobs:
+  osv-scan:
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@9a498708959aeaef5ef730655706c5a1df1edbc2 # v2.3.8
+    with:
+      scan-args: |-
+        --lockfile=package-lock.json
+      # Intentionally false: a known, already-triaged PostCSS advisory (see
+      # Guide 1 — dev-tooling-only, no untrusted-input path) would otherwise
+      # fail this job on every single run regardless of whether anything new
+      # was found. The real signal lives in Security > Code Scanning, which
+      # distinguishes new alerts from previously-seen ones — enable
+      # notifications there, not on this workflow's pass/fail status.
+      fail-on-vuln: false
