@@ -28,6 +28,7 @@ Tests are written in **TypeScript** using **Playwright Test**, Playwright's buil
 ## Audits
 
 - [Scale Check Audit](audits/scale-check-audit.md)
+- [Security Check Audit](audits/security-check-audit.md)
 
 ## About This Project
 
