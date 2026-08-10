@@ -40,6 +40,14 @@ This audit references the **OWASP API Security Top 10 (2023)** for authorization
 
 **Real alerting mechanism: GitHub Security → Code Scanning, not job status.** Results upload via SARIF (default behavior) to a persistent, browsable alert list that distinguishes new findings from previously-seen ones. Notifications are enabled for new Code Scanning alerts specifically, so a genuinely new vulnerability produces a real notification — the pre-existing PostCSS advisory doesn't re-trigger one on every routine run.
 
+**Category: Software Composition Analysis (SCA).** OSV-Scanner belongs to a specific, named class of tooling — SCA, which checks third-party/open-source dependencies for known vulnerabilities. Distinct from SAST (analyzing an application's own source) and DAST (testing a running application). Worth naming explicitly: SCA is a standard line item in regulated-industry security programs, not a generic "best practice."
+
+**Why the same control carries more weight outside this project's scope.** This application has no production data at stake — practical exposure here is limited to CI-environment secrets (see Findings above). The identical control means materially more once real regulated data is involved:
+- **Healthcare (PHI):** the HIPAA Security Rule requires documented risk analysis covering an application's full technology stack, including third-party and open-source components. A breach traced to a known, unpatched CVE in a dependency is a materially harder finding to defend than one from a genuinely unknown vulnerability.
+- **Finance (payment/account data):** PCI-DSS 4.0 Requirement 6.3.2 requires an inventory of custom and third-party software components paired with a vulnerability-management process — functionally what SCA scanning plus the documented response policy above provides. (Illustrative only — see "Explicitly out of scope" below; this application has no payment-processing surface, so PCI-DSS itself doesn't apply here.)
+
+Both examples describe the same shift: SCA moves from good hygiene to a named compliance control once an application handles PHI or payment/financial data.
+
 ## Framework Applicability
 
 **Directly applied:**
