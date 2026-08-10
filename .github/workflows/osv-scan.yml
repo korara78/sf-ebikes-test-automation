@@ -12,6 +12,11 @@ on:
 permissions:
   contents: read
   security-events: write   # required to upload SARIF results to the Security tab
+  actions: read   # required by the reusable workflow itself (cross-repo call) — without
+                  # this, GitHub refuses to even start the job: 0 jobs, immediate
+                  # startup_failure, no logs. The callee's own `permissions:` block
+                  # requests actions:read, and a caller granting less than that fails
+                  # at dispatch time rather than at runtime.
 
 jobs:
   osv-scan:
