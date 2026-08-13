@@ -49,7 +49,8 @@ npx playwright install --with-deps   # browser binaries; CI does this on every r
 
 ## Conventions
 
-- **Locators (see Guide 2's "Locator Strategy"):** semantic locators (`getByRole`/`getByLabel`/`getByText`) first, always. A CSS class/tag selector is a documented last resort only — acceptable when a Salesforce/LWC element genuinely has no accessible role or name, and only with a comment saying so explicitly. Applies to every new page object and locator, not just the ones that motivated the rule.
+- **Adding a new requirement/test (see [Guide 9](guides/09-pom-conventions-and-test-writing-workflow.md)):** check `traceability-map.mjs` for ~80%-duplicate coverage first, then check whether an existing POM method already covers it, before adding anything new. Raw selectors never belong in a `*.spec.ts` file — only POM method calls; `REQ-####` IDs live solely in `traceability-map.mjs`, never as test tags (`{ tag: '@TC-###' }` only).
+- **Locators (see Guide 2's "Locator Strategy" and [Guide 9](guides/09-pom-conventions-and-test-writing-workflow.md)):** semantic locators (`getByRole`/`getByLabel`/`getByText`) first, always. A CSS class/tag selector is a documented last resort only — acceptable when a Salesforce/LWC element genuinely has no accessible role or name, and only with a comment saying so explicitly. Applies to every new page object and locator, not just the ones that motivated the rule.
 - **Actionability (see Guide 2's "Actionability: No Bare Waits"):** never use a bare `page.waitForTimeout()` to paper over a timing/settling race. Playwright's built-in actionability checks already cover the target element itself; for a genuine settling condition they don't cover (e.g. a surrounding modal still animating), wait on that condition explicitly via `expect.poll()` or `pages/actionability.ts`'s `waitForStableLayout()`.
 
 ## Notes from the environment guide worth knowing when working here
